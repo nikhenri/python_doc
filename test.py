@@ -13,7 +13,7 @@ from docx.shared import Cm, Inches
 document = Document()
 sections = document.sections
 for section in sections:
-    section.left_margin = Cm(2)
+    section.left_margin = Cm(2.0)
 
 document.add_heading('Super Nikk', 0)
 
@@ -117,7 +117,7 @@ def MarkIndexEntry(entry,paragraph):
 
 
 paragraph = document.add_paragraph('Table ', style='Caption')
-#paragraph.paragraph_format.left_indent = Cm(2.0)
+paragraph.paragraph_format.left_indent = -Cm(0.25)
 Table(paragraph)
 paragraph.add_run(': ')
 MarkIndexEntry("OtiRegister:Name", paragraph)
@@ -131,7 +131,7 @@ paragraph.add_run(')')
 
 
 table = document.add_table(rows=1, cols=5)
-table.left_margin  = Cm(2.0)
+#table.left_margin  = Cm(2.25)
 #shading_elm_1 = parse_xml(r'<w:shd {} w:fill="d9d9d9"/>'.format(nsdecls('w')))
 #table.rows[0].cells[0]._tc.get_or_add_tcPr().append(shading_elm_1)
 shading_elm = []
