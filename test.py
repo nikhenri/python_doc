@@ -11,6 +11,9 @@ from docx.oxml.ns import qn
 from docx.shared import Cm, Inches
 
 document = Document()
+sections = document.sections
+for section in sections:
+    section.left_margin = Cm(2)
 
 document.add_heading('Super Nikk', 0)
 
@@ -114,6 +117,7 @@ def MarkIndexEntry(entry,paragraph):
 
 
 paragraph = document.add_paragraph('Table ', style='Caption')
+#paragraph.paragraph_format.left_indent = Cm(2.0)
 Table(paragraph)
 paragraph.add_run(': ')
 MarkIndexEntry("OtiRegister:Name", paragraph)
@@ -123,7 +127,11 @@ MarkIndexEntry("OtiRegister:Addr", paragraph)
 paragraph.add_run('0x000')
 MarkIndexEntry("OtiRegister:AddrEnd", paragraph)
 paragraph.add_run(')')
+
+
+
 table = document.add_table(rows=1, cols=5)
+table.left_margin  = Cm(2.0)
 #shading_elm_1 = parse_xml(r'<w:shd {} w:fill="d9d9d9"/>'.format(nsdecls('w')))
 #table.rows[0].cells[0]._tc.get_or_add_tcPr().append(shading_elm_1)
 shading_elm = []
@@ -139,7 +147,7 @@ hdr_cells[1].text = 'Field Name'
 hdr_cells[2].text = 'Default Value'
 hdr_cells[3].width = Cm(1.0)
 hdr_cells[3].text = 'Type'
-hdr_cells[4].width = Cm(7.0)
+hdr_cells[4].width = Cm(9.0)
 hdr_cells[4].text = 'Description'
 
 row_cells = table.add_row().cells
@@ -170,7 +178,7 @@ p.add_run("RW")
 MarkIndexEntry("Oti", p)
 
 
-row_cells[4].width = Cm(7.0)
+row_cells[4].width = Cm(9.0)
 p = row_cells[4].paragraphs[0]
 p.add_run("IP address of offload engine")
 
