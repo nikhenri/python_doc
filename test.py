@@ -12,9 +12,9 @@ from docx.shared import Cm, Inches
 
 document = Document()
 
-document.add_heading('Super Nik', 0)
+document.add_heading('Super Nikk', 0)
 
-# p = document.add_paragraph('A plain paragraph having some ')
+#p = document.add_paragraph('WOOF ', style='Caption')
 # p.add_run('bold').bold = True
 # p.add_run(' and some ')
 # p.add_run('italic.').italic = True
@@ -57,6 +57,34 @@ document.add_heading('Super Nik', 0)
 	# row_cells[2].text = str(item['desc'])
 
 # -------------
+def Table(paragraph):
+    run = run = paragraph.add_run()
+    r = run._r
+    fldChar = OxmlElement('w:fldChar')
+    fldChar.set(qn('w:fldCharType'), 'begin')
+    r.append(fldChar)
+    instrText = OxmlElement('w:instrText')
+    instrText.text = ' STYLEREF 1 \s'
+    r.append(instrText)
+    fldChar = OxmlElement('w:fldChar')
+    fldChar.set(qn('w:fldCharType'), 'end')
+    r.append(fldChar)
+
+    paragraph.add_run("-")
+
+    run = run = paragraph.add_run()
+    r = run._r
+    fldChar = OxmlElement('w:fldChar')
+    fldChar.set(qn('w:fldCharType'), 'begin')
+    r.append(fldChar)
+    instrText = OxmlElement('w:instrText')
+    instrText.text = ' SEQ Table \* ARABIC'
+    r.append(instrText)
+    fldChar = OxmlElement('w:fldChar')
+    fldChar.set(qn('w:fldCharType'), 'end')
+    r.append(fldChar)
+
+
 def MarkIndexEntry(entry,paragraph):
     run = paragraph.add_run()
     r = run._r
@@ -83,6 +111,18 @@ def MarkIndexEntry(entry,paragraph):
     fldChar.set(qn('w:fldCharType'), 'end')
     r.append(fldChar)
 
+
+
+paragraph = document.add_paragraph('Table ', style='Caption')
+Table(paragraph)
+paragraph.add_run(': ')
+MarkIndexEntry("OtiRegister:Name", paragraph)
+paragraph.add_run('IPV4_IP_ADDR (')
+MarkIndexEntry("OtiBaseAddress:OTI_IPV4_BASE_ADD", paragraph)
+MarkIndexEntry("OtiRegister:Addr", paragraph)
+paragraph.add_run('0x000')
+MarkIndexEntry("OtiRegister:AddrEnd", paragraph)
+paragraph.add_run(')')
 table = document.add_table(rows=1, cols=5)
 #shading_elm_1 = parse_xml(r'<w:shd {} w:fill="d9d9d9"/>'.format(nsdecls('w')))
 #table.rows[0].cells[0]._tc.get_or_add_tcPr().append(shading_elm_1)
