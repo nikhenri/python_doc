@@ -2,6 +2,68 @@
 # pip install docxtpl
 
 
+
+import json
+all_project_config = None
+with open("project_config.json") as f:
+    all_project_config = json.load(f)
+
+def fill_dict(dict):
+    for ip_name in dict:
+        print(f"working on IP {ip_name}")
+        for addr in dict[ip_name]:
+            print(f"working on addr {addr}")
+            field_found = False
+
+            # If no field declared,
+            for reg_field in dict[ip_name][addr]:  # copy parent info
+                if reg_field.startswith("["):
+                    field_found = True
+                    break
+            if not field_found:
+                dict[ip_name][addr]["[31:0]"] = {}
+
+            # copy parent info
+            list_idx = []
+            for reg_field in dict[ip_name][addr]:
+                if reg_field.startswith("["):
+                    if ":" in reg_field:
+                        (high, low) = reg_field[1:-1].split(":")
+                    else:
+                        high = low = reg_field[1:-1]
+                    dict[ip_name][addr][reg_field] = {**dict[ip_name][addr], **dict[ip_name][addr][reg_field]}
+                    for i in range(int(low),int(high)+1):
+                        list_idx.append(i)
+                    print()
+            # puts the reserved
+            if len(list_idx) != 32:
+                list_idx.sort()
+                print(f"> {addr} doesnt descript all field")
+                prev=-1
+                for i in list_idx:
+                    if i != prev+1:
+                        print(f"missing {prev+1} to {i-1}")
+                        if {i-1} - {prev+1} == 0:
+                            dict[ip_name][addr][f"[{i-1}]"] ={"name":"RSVD", "rst":"0x0", "type":"RO", "desc":"Reserved"}
+                        else:
+                            dict[ip_name][addr][f"[{i - 1}:{prev + 1}]"] = {"name": "RSVD", "rst": "0x0", "type": "RO", "desc": "Reserved"}
+                    prev = i
+                if list_idx[-1] != 31:
+                    print(f"missing {list_idx[-1] + 1} to 31")
+                    if 31 - (list_idx[-1] + 1) == 0:
+                        dict[ip_name][addr][f"[31]"] = {"name": "RSVD", "rst": "0x0", "type": "RO", "desc": "Reserved"}
+                    else:
+                        dict[ip_name][addr][f"[31:{list_idx[-1] + 1}]"] = {"name": "RSVD", "rst": "0x0", "type": "RO", "desc": "Reserved"}
+
+fill_dict(all_project_config)
+exit
+
+
+
+
+
+
+
 from docx import Document
 from docx.shared import RGBColor
 from docx.oxml.ns import nsdecls
@@ -14,6 +76,9 @@ document = Document()
 sections = document.sections
 for section in sections:
     section.left_margin = Cm(2.0)
+
+
+
 
 document.add_heading('Super Nikk', 0)
 
@@ -184,4 +249,4 @@ p.add_run("IP address of offload engine")
 
 
 
-document.save('simple.docx')
+#document.save('simple.docx')
