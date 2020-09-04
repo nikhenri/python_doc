@@ -15,8 +15,8 @@
         "0x4":   {"name": "IPV4_SUB_NET_MASK",
                   "type": "RW",
                   "desc": "sub net mask",
-                  "[31:0]": {"name": "SUB_NET_MASK",
-                             "rst":  "0xffffff00",
+                  "[31:0]": {"name": "SUBNET_MASK",
+                             "rst":  "0XFFFFFF00",
                              "desc": "sub net mask"
                             }
                  },
@@ -24,8 +24,8 @@
         "0x8":   {"name": "IPV4_DEFAULT_GATEWAY",
                   "type": "RW",
                   "desc": "default gateway",
-                  "[31:0]": {"name": "DEFAULT_GATEWAY",
-                             "rst":  "0xffffff00",
+                  "[31:0]": {"name": "DFLT_GW",
+                             "rst":  "0x0",
                              "desc": "default gateway"
                             }
                  },
