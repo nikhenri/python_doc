@@ -1,91 +1,77 @@
 {
 
     "IPv4" : {
-        "0x0":   {"name": "ipv4_ip_addr",
-                  "type": "rw",
-                  "desc": "IP address of offload engine",
-                  "[31:0]": {"name": "ipv4_ip_addr",
+        "OtiBaseAddress" : "OTI_IPV4_BASE_ADD",
+
+        "0x0":   {"name": "IPV4_IP_ADDR",
+                  "type": "RW",
+                  "desc": "ip address of offload engine",
+                  "[31:0]": {"name": "IP_ADD",
                              "rst":  "0x13356219",
-                             "desc": "IP address of offload engine"
+                             "desc": "ip address of offload engine"
                             }
                  },
 
-        "0x4":   {"name": "ipv4_sub_net_mask",
-                  "type": "rw",
-                  "desc": "Sub net mask",
-                  "[31:0]": {"name": "ipv4_sub_net_mask",
-                             "rst":  "0xFFFFFF00",
-                             "desc": "Sub net mask"
+        "0x4":   {"name": "IPV4_SUB_NET_MASK",
+                  "type": "RW",
+                  "desc": "sub net mask",
+                  "[31:0]": {"name": "SUB_NET_MASK",
+                             "rst":  "0xffffff00",
+                             "desc": "sub net mask"
                             }
                  },
 
-        "0x8":   {"name": "ipv4_default_gateway",
-                  "type": "rw",
-                  "desc": "Default gateway",
-                  "[31:0]": {"name": "ipv4_default_gateway",
-                             "rst":  "0xFFFFFF00",
-                             "desc": "Default gateway"
+        "0x8":   {"name": "IPV4_DEFAULT_GATEWAY",
+                  "type": "RW",
+                  "desc": "default gateway",
+                  "[31:0]": {"name": "DEFAULT_GATEWAY",
+                             "rst":  "0xffffff00",
+                             "desc": "default gateway"
                             }
                  },
 
-        "0xc":   {"name": "ipv4_tx_frame_cnt",
-                  "type": "ro",
-                  "desc": "Increment at each frame sent to L2",
-                  "[31:0]": {"name": "ipv4_tx_frame_cnt",
+        "0xc":   {"name": "IPV4_TX_FRAME_CNT",
+                  "type": "RO",
+                  "desc": "increment at each frame sent to l2",
+                  "[31:0]": {"name": "TX_FRAME_CNT",
                              "rst":  "0x0",
-                             "desc": "Increment at each frame sent to L2"
+                             "desc": "increment at each frame sent to l2"
                             }
                  },
 
-        "0x10":  {"name": "ipv4_rx_frame_cnt",
-                  "type": "ro",
-                  "desc": "Increment at each frame received from L2. Increment even frame contain error",
-                  "[31:0]": {"name": "ipv4_rx_frame_cnt",
+        "0x10":  {"name": "IPV4_RX_FRAME_CNT",
+                  "type": "RO",
+                  "desc": "increment at each frame received from l2. increment even frame contain error",
+                  "[31:0]": {"name": "RX_FRAME_CNT",
                              "rst":  "0x0",
-                             "desc": "Increment at each frame received from L2. Increment even frame contain error"
+                             "desc": "increment at each frame received from l2. increment even frame contain error"
                             }
                  },
 
-        "0x14":  {"name": "ipv4_rx_error_checksum_cnt",
-                  "type": "ro",
-                  "desc": "Increment each time a checksum error is detected in the IPv4 header",
-                  "[31:0]": {"name": "ipv4_rx_error_checksum_cnt",
+        "0x14":  {"name": "IPV4_RX_ERROR_CHECKSUM_CNT",
+                  "type": "RO",
+                  "desc": "increment each time a checksum error is detected in the ipv4 header",
+                  "[31:0]": {"name": "RX_ERROR_CHECKSUM_CNT",
                              "rst": "0x0",
-                             "desc": "Increment each time a checksum error is detected in the IPv4 header"
+                             "desc": "increment each time a checksum error is detected in the ipv4 header"
                             }
                   },
 
-        "0x18":  {"name": "ipv4_rx_error_header_cnt",
-                  "type": "ro",
-                  "desc": "Increment each time the IPv4 header version not equal to 4 or HLS not equal to 5 or Flags not equal to 2",
-                  "[31:0]": {"name": "ipv4_rx_error_header_cnt",
+        "0x18":  {"name": "IPV4_RX_ERROR_HEADER_CNT",
+                  "type": "RO",
+                  "desc": "increment each time the ipv4 header version not equal to 4 or hls not equal to 5 or flags not equal to 2",
+                  "[31:0]": {"name": "RX_ERROR_HEADER_CNT",
                              "rst": "0x0",
-                             "desc": "Increment each time the IPv4 header version not equal to 4 or HLS not equal to 5 or Flags not equal to 2"
+                             "desc": "increment each time the ipv4 header version not equal to 4 or hls not equal to 5 or flags not equal to 2"
                             }
                  },
 
-        "0x1c":  {"name": "ipv4_status",
-                  "type": "ro",
-                  "desc": "IPv4 status",
+        "0x1c":  {"name": "IPV4_STATUS",
+                  "type": "RO",
+                  "desc": "ipv4 status",
                   "[0]":     {"name": "DFLT_GW_TABLE_ID_VALID",
                               "rst":  "0x0",
                               "desc": "Indicate the IPv4 default gateway MAC address is resolved"
-                             },
-                  "[3:2]":   {"name": "FAKE_REG",
-                              "rst":  "0x0",
-                              "desc": "Fake for test"
-                             },
-                  "[24:16]": {"name": "FAKE_REG2",
-                              "rst":  "0x0",
-                              "desc": "Fake for test2"
-                             },
-                  "[30]":    {"name": "FAKE_REG2",
-                              "rst":  "0x0",        
-                              "desc": "Fake for test2"
-                             },
-                  "[5]":     {"name": "FAKE_REG2",
-                              "rst":  "0x0",
-                              "desc": "Fake for test2"
                              }
                   }
     }
