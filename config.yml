@@ -1,0 +1,244 @@
+IPv4:
+    docParser: "OTI_IPV4_BASE_ADD"
+    register:
+        0xA:
+            name: "IPV4_IP_ADDR"
+            type: "RW"
+            desc: "ip address of offload engine"
+            field: 
+                31-0: 
+                    name: "IP_ADD"
+                    rst: "0x13356219"
+                    desc: "ip address of offload engine"
+Config:
+    version:  1.0
+    required_version: 1.0
+    board_id: HVAC
+
+    Buses:
+        - name:   Car CAN
+          type:   CAN
+          number: 0
+          params:
+              baud: 125K
+              mode: STD
+        - name:   Kommander CAN
+          type:   CAN
+          number: 1
+          params:
+              baud: 1M
+              mode: EXT
+        - name:   AUX1 CAN
+          type:   CAN
+          number: 2
+          params:
+              baud: 1M
+              mode: STD
+
+    Mutations:
+        - name:     Custom protocol get prop
+          bus:      AUX1 CAN
+          matching: 0x6E7
+          nb_bytes: 1
+          command:  direct_answer_get_prop
+
+        - name:     Custom protocol set prop
+          bus:      AUX1 CAN
+          matching: 0x5E7
+          nb_bytes: 5
+          command:  direct_answer_set_prop
+
+        - name:     Some Car Message
+          bus:      Car CAN
+          matching: 0x555
+          nb_bytes: 1
+          command:  set_some_car_prop
+
+    Messages:
+        - name:     msg_reply_get_prop
+          nb_bytes: 4
+          bus:      AUX1 CAN
+          command:  do_reply_get_prop
+
+    Monitors:
+        - name:     Increment Iteration Counter
+          command:  mon_inc_counter
+        - name:     Check Keypad
+          command:  mon_check_keypad
+        - name:     Update Keypad
+          command:  mon_update_keypad
+        - name:     Slow Blink Random LED
+          command:  mon_manage_random_led
+
+
+    Timers:
+        - name:       test_timer
+          on_elapsed: ret_true
+          autoreload: true
+        
+    Properties:
+        - name: random_led_status
+          type: bit
+        - name: prop_keypad_changes
+          type: u16
+        - name: some_car_prop
+          type: u8
+        - name: iteration_counter
+          type: u32
+        - name: custom_protocol_prop_target
+          type: u8
+        - name: custom_protocol_prop_value
+          type: u32
+
+    Commands:
+        - name: init
+          code: |
+              ret
+
+        - name: ret_true
+          code: |
+              set A
+              ret A
+
+        - name: mon_check_keypad
+          code: |
+              clr  r0
+              clr  r1
+              clr  r2
+              call =get_input_pulse_keypad, r2
+              or   r1, r0
+              add  r2, =1
+              call =get_input_pulse_keypad, r2
+              or   r1, r0
+              add  r2, =1
+              call =get_input_pulse_keypad, r2
+              or   r1, r0
+              add  r2, =1
+              call =get_input_pulse_keypad, r2
+              or   r1, r0
+              ldp  r0, =prop_keypad_changes
+              add  r0, r1
+              stp  r0, =prop_keypad_changes
+
+        - name: mon_update_keypad
+          code: |
+              clr  r1
+              clr  r2
+              call =get_input_keypad, r1
+              mov  r2, r0
+              call =set_output_keypad, r1
+              add  r1, =1
+              call =get_input_keypad, r1
+              mov  r2, r0
+              call =set_output_keypad, r1
+              add  r1, =1
+              call =get_input_keypad, r1
+              mov  r2, r0
+              call =set_output_keypad, r1
+              add  r1, =1
+              call =get_input_keypad, r1
+              mov  r2, r0
+              call =set_output_keypad, r1
+              add  r1, =1
+
+              ; That last led, handle it from random_led_status
+              ldp  r2, =random_led_status
+              call =set_output_keypad, r1
+
+        - name: set_output_keypad
+          code: |
+              ; r0: index
+              ; r1: value
+              mov  r2, =SetOutput
+              mov  r3, r0
+              mov  r4, r1
+              call =generic_keypad_io_fn, r2, #0
+              ret
+
+        - name: get_input_keypad
+          code: |
+              ; r0: index
+              mov  r1, =GetInput
+              mov  r2, r0
+              call =generic_keypad_io_fn, r1, #1
+              ret  r0
+
+        - name: get_input_pulse_keypad
+          code: |
+              ; r0: index
+              mov  r1, =GetInputPulse
+              mov  r2, r0
+              call =generic_keypad_io_fn, r1, #1
+              ret  r0
+
+        - name: generic_keypad_io_fn
+          code: |
+              ; r0: fn
+              ; r1: io_index
+              ; r2: value (if applicable)
+
+              mov  r3, =3 ; keypad
+              clr  r4
+              clr  r5
+              mov  r6, r1
+              mov  r7, r2
+              call r0, r3, #1
+              ret  r0
+
+        - name: mon_manage_random_led
+          code: |
+              set r0
+              mov r1, =test_timer
+              mov r2, =3000
+              call =ManageTimer, A
+              retc.z r0
+
+              ldp  r1, =random_led_status
+              xor  r1, r0
+              stp  r1, =random_led_status
+
+        - name: direct_answer_get_prop
+          code: |
+              clr
+              call =GetMsgByte, A
+              stp  =custom_protocol_prop_target
+              mov  =msg_reply_get_prop
+              call =SendMsg, A
+
+        - name: do_reply_get_prop
+          code: |
+              mov  =0x57A
+              call =SetMsgId, A
+              ldp  =custom_protocol_prop_target
+              ldp  r2, r0
+              clr
+              mov  r1, =32
+              call =SetMsgBits, A
+
+        - name: direct_answer_set_prop
+          code: |
+              clr  r1
+              call =GetMsgByte, r1
+              stp  =custom_protocol_prop_target
+              mov  r2, A
+              mov  r0, =8
+              mov  r1, =32
+              call =GetMsgBits, r0
+              stp  =custom_protocol_prop_value
+              stp  r2
+              mov  =msg_reply_get_prop
+              call =SendMsg, A
+
+        - name: set_some_car_prop
+          code: |
+              clr
+              call =GetMsgByte, A
+              stp  =some_car_prop
+
+        - name: mon_inc_counter
+          code: |
+              ldp =iteration_counter
+              add =1
+              stp =iteration_counter
+
+
