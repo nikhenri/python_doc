@@ -1,5 +1,23 @@
 # pip install docx
 # pip install docxtpl
+import subprocess
+import sys
+
+try:
+    import docx
+except ImportError:
+    print("yii")
+    subprocess.check_call([sys.executable, "-m", "pip", "install", 'docx'])
+finally:
+    import docx
+
+    # try:
+    #     import yaml
+    # except ImportError:
+    #     print("yii")
+    #     subprocess.check_call([sys.executable, "-m", "pip", "install", 'docxtpl'])
+    # finally:
+    #     import yaml
 
 import re
 for i in ["[31]", "[7]", "[31:4]", "[2:1]"]:
