@@ -6,7 +6,7 @@ IPv4:
             type: "RW"
             desc: "ip address of offload engine"
             field: 
-                31-0: 
+                31-0:
                     name: "IP_ADD"
                     rst: "0x13356219"
                     desc: "ip address of offload engine"
@@ -71,7 +71,7 @@ IPv4:
                     rst: "0x0"
                     desc: "increment each time the ipv4 header version not equal to 4 or hls not equal to 5 or flags not equal to 2"
 
-        "0x1C": 
+        0x1C: 
             name: "IPV4_STATUS"
             type: "RO"
             desc: "ipv4 status"
