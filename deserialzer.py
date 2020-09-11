@@ -4,7 +4,9 @@
 #  Author: Nik Henri
 # -------------------------------------------------------------------------------------
 import pathlib
-
+import sys
+import subprocess
+import yaml
 
 class Deserialzer:
     # -------------------------------------------------------------------------------------
@@ -22,14 +24,13 @@ class Deserialzer:
     # -------------------------------------------------------------------------------------
     def _deserialze_yaml(self, filename):
         # Import install
-        try:
-             import yaml
-        except ImportError:
-            print("Installing 'pyyaml'")
-            import pip
-            pip.main(['install', '--user', 'pyyaml'])
-        finally:
-             import yaml
+        # try:
+        #      import yaml
+        # except ImportError:
+        #     print("Installing 'pyyaml'")
+        #     subprocess.check_call([sys.executable, "-m", "pip", "install", 'pyyaml'])
+        # finally:
+        #      import yaml
 
         # read yaml
         with open(filename, 'r') as stream:

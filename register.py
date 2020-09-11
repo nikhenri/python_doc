@@ -7,7 +7,6 @@
 
 class Register:
 
-
     # -------------------------------------------------------------------------------------
     def __init__(self, reg_dict):
         self.reg_dict = reg_dict
