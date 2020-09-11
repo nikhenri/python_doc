@@ -4,24 +4,10 @@
 #  Author: Nik Henri
 # -------------------------------------------------------------------------------------
 print("\nGenik @Nik\n")
-
 # -------------------------------------------------------------------------------------
-import lxml
-
-
 import sys
 import os
-print(os.environ.get('PYTHONPATH', ''))
-#os.environ["PYTHONPATH"] = os.getcwd()
-print(os.environ.get('PYTHONPATH', ''))
-print(">> wof")
-import site
-site.addsitedir('./lxml')
-from lxml import etree
 
-
-print(sys.path)
-exit()
 import deserialzer
 import register
 import gen_docx
@@ -29,8 +15,6 @@ import gen_docx
 # -------------------------------------------------------------------------------------
 
 FILENAME = "config.yaml"
-
-#sys.dont_write_bytecode = True  # Avoid the anoying *.pyc
 
 # Change Working dir to script dir
 path = os.path.dirname(os.path.realpath(__file__)).replace('\\', '/')
@@ -51,7 +35,7 @@ register_obj = register.Register(reg_dict)
 print(f"Done!")
 
 print(f"Generate .docx...")
-gen_docx_obj = gen_docx.GenDocx(register_obj).generate(open_when_finish=1)
+gen_docx_obj = gen_docx.GenDocx().generate(register_obj)
 print(f"Done!")
 
 #print(f"Generate .svh...")
