@@ -4,10 +4,11 @@
 #  Author: Nik Henri
 # -------------------------------------------------------------------------------------
 print("\nGenik @Nik\n")
+
 # -------------------------------------------------------------------------------------
 import sys
 import os
-
+print(sys.path)
 import deserialzer
 import register
 import gen_docx
