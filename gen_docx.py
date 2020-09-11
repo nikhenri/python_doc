@@ -7,8 +7,15 @@ import os
 import sys
 import subprocess
 import importlib
-#import docx
-
+import docx
+from docx import Document
+from docx.shared import RGBColor
+from docx.oxml.ns import nsdecls
+from docx.oxml import parse_xml
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
+from docx.shared import Cm, Inches
+from docx.enum.dml import MSO_THEME_COLOR_INDEX
 
 class GenDocx:
     FILENAME = 'register.docx'
@@ -33,14 +40,7 @@ class GenDocx:
         #     finally:
         #         importlib.import_module(module)
 
-        from docx import Document
-        from docx.shared import RGBColor
-        from docx.oxml.ns import nsdecls
-        from docx.oxml import parse_xml
-        from docx.oxml import OxmlElement
-        from docx.oxml.ns import qn
-        from docx.shared import Cm, Inches
-        from docx.enum.dml import MSO_THEME_COLOR_INDEX
+
 
         document = Document()
         sections = document.sections
