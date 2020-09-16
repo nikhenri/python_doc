@@ -20,7 +20,7 @@ finally:
 from docx.shared import Cm
 from docx.enum.dml import MSO_THEME_COLOR_INDEX
 from docx.oxml import OxmlElement
-
+import lxml
 
 # -------------------------------------------------------------------------------------
 class GenDocx:
@@ -43,6 +43,16 @@ class GenDocx:
             self.add_ip_docmentation(ip)
 
         self.document.save(f'{filename}.docx')
+        # self.set_updatefields_true(f'{filename}.docx')
+
+        import zipfile
+        #zip = zipfile.ZipFile(f'{filename}.docx')
+        #zip.extractall()
+        #zip.extract('word/document.xml', "./")
+        with zipfile.ZipFile(f'{filename}.docx') as z:
+            with open(f'{filename}.xml', 'wb') as f:
+                f.write(z.read('word/document.xml'))
+
         if open_generate_file:
             os.startfile(f'{filename}.docx')
 
@@ -144,14 +154,14 @@ class GenDocx:
         run = paragraph.add_run()
         r = run._r
         for caption in caption_list:
-            fldchar = docx.oxml.OxmlElement('w:fldchar')
-            fldchar.set(docx.oxml.ns.qn('w:fldcharType'), 'begin')
+            fldchar = docx.oxml.OxmlElement('w:fldChar')
+            fldchar.set(docx.oxml.ns.qn('w:fldCharType'), 'begin')
             r.append(fldchar)
-            instrtext = docx.oxml.OxmlElement('w:instrtext')
+            instrtext = docx.oxml.OxmlElement('w:instrText')
             instrtext.text = caption
             r.append(instrtext)
-            fldchar = docx.oxml.OxmlElement('w:fldchar')
-            fldchar.set(docx.oxml.ns.qn('w:fldcharType'), 'end')
+            fldchar = docx.oxml.OxmlElement('w:fldChar')
+            fldchar.set(docx.oxml.ns.qn('w:fldCharType'), 'end')
             r.append(fldchar)
 
             if include_chapter_nb:
@@ -255,3 +265,34 @@ class GenDocx:
         r.font.color.theme_color = MSO_THEME_COLOR_INDEX.HYPERLINK
         
     # -------------------------------------------------------------------------------------
+    # def update_fields(save_path):
+    #     """ Automatically updates the fields when opening the word document """
+    #     namespace = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
+    #     doc = DocxTemplate(save_path)
+    #
+    #     element_updatefields = lxml.etree.SubElement(
+    #         doc.settings.element, f"{namespace}updateFields"
+    #     )
+    #     element_updatefields.set(f"{namespace}val", "true")
+    #
+    #     doc.save(save_path)
+
+    def set_updatefields_true(self, docx_path: str):
+        """ Opens the docx and adds <w:updateFields w:val="true"/> to
+           (docx_path)/word/settings.xml to enforce update of TOC (and
+           other fields marked as dirty) on first open.
+           Saves the file afterwards.
+
+        Arguments:
+            docx_path {str} -- Absolute path to docx
+        Returns:
+            Nothing
+        """
+        namespace = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
+        doc = docx.Document(docx_path)
+        # add child to doc.settings element
+        element_updatefields = lxml.etree.SubElement(
+            doc.settings.element, f"{namespace}updateFields"
+        )
+        element_updatefields.set(f"{namespace}val", "true")
+        doc.save(docx_path)
