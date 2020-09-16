@@ -16,7 +16,7 @@ class Register:
     # -------------------------------------------------------------------------------------
     # Quick check to see if the required field are there
     def validate(self):
-        IP_KEYS = ['docParser', 'register']
+        IP_KEYS = ['docParser_base_str', 'register']
         REGISTER_KEYS = ['name', 'type', 'desc', 'field']
         FIELD_KEYS = ['name', 'rst', 'desc']
 
@@ -43,9 +43,45 @@ class Register:
         return self.reg_dict.keys()
 
     # -------------------------------------------------------------------------------------
-    def get_ip_addr_list(self, register_name):
-        return self.reg_dict[register_name]['register'].keys()
+    #def get_ip_register_list(self, ip):
+    #    return list(map(lambda x: x['name'], self.reg_dict[ip]['register'].values()))
 
     # -------------------------------------------------------------------------------------
-    def get_register_name(self, register_name, addr):
-        return self.reg_dict[register_name]['register'][addr]['name']
+    def get_ip_addr_list(self, ip):
+        return self.reg_dict[ip]['register'].keys()
+
+    # -------------------------------------------------------------------------------------
+    def get_ip_addr_type(self, ip, addr):
+        return self.reg_dict[ip]['register'][addr]['type']
+
+    # -------------------------------------------------------------------------------------
+    def get_ip_addr_name(self, ip, addr):
+        return self.reg_dict[ip]['register'][addr]['name']
+
+    # -------------------------------------------------------------------------------------
+    def get_ip_addr_desc(self, ip, addr):
+        return self.reg_dict[ip]['register'][addr]['desc']
+
+    # -------------------------------------------------------------------------------------
+    def get_ip_docParser_base_str(self, ip):
+        return self.reg_dict[ip]['docParser_base_str']
+
+    # -------------------------------------------------------------------------------------
+    def get_ip_addr_field_list(self, ip, addr):
+        return self.reg_dict[ip]['register'][addr]['field'].keys()
+
+    # -------------------------------------------------------------------------------------
+    def get_ip_addr_field_name(self, ip, addr, field):
+        return self.reg_dict[ip]['register'][addr]['field'][field]['name']
+
+    # -------------------------------------------------------------------------------------
+    def get_ip_addr_field_reset(self, ip, addr, field):
+        return self.reg_dict[ip]['register'][addr]['field'][field]['rst']
+
+    # -------------------------------------------------------------------------------------
+    def get_ip_addr_field_desc(self, ip, addr, field):
+        return self.reg_dict[ip]['register'][addr]['field'][field]['desc']
+
+    # -------------------------------------------------------------------------------------
+    def get_ip_addr_field_type(self, ip, addr, field):
+        return self.reg_dict[ip]['register'][addr]['type']

@@ -35,7 +35,7 @@ register_obj = register.Register(reg_dict)
 print(f"Done!")
 
 print(f"Generate .docx...")
-gen_docx_obj = gen_docx.GenDocx().generate(register_obj)
+gen_docx_obj = gen_docx.GenDocx(register_obj).generate('register', True)
 print(f"Done!")
 
 #print(f"Generate .svh...")

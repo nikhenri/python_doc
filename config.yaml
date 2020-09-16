@@ -1,5 +1,5 @@
 IPv4:
-    docParser: "OTI_IPV4_BASE_ADD"
+    docParser_base_str: "OTI_IPV4_BASE_ADD"
     register:
         0x0:
             name: "IPV4_IP_ADDR"
@@ -62,7 +62,7 @@ IPv4:
                     desc: "increment each time a checksum error is detected in the ipv4 header"
 
         0x18: 
-            name: "IPV4w_RX_ERROR_HEADER_CNT"
+            name: "IPV4_RX_ERROR_HEADER_CNT"
             type: "RO"
             desc: "increment each time the ipv4 header version not equal to 4 or hls not equal to 5 or flags not equal to 2"
             field: 
