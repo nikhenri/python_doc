@@ -20,13 +20,12 @@ finally:
 from docx.shared import Cm
 from docx.enum.dml import MSO_THEME_COLOR_INDEX
 from docx.oxml import OxmlElement
-#from docx.oxml.ns import qn
+
 
 # -------------------------------------------------------------------------------------
-
-
 class GenDocx:
     DOC_PARSER_CAPTION = 1
+    MARK_ENTRY_COLOR = docx.shared.RGBColor(255, 192, 0)
 
     # -------------------------------------------------------------------------------------
     def __init__(self, register_obj):
@@ -55,7 +54,7 @@ class GenDocx:
     # -------------------------------------------------------------------------------------
     def add_summary_table(self, ip):
         print(f"Generate summary table for '{ip}'")
-        self.add_summary_table_title(ip)
+        self.add_caption_title(ip)
         self.add_summary_table_content(ip)
         self.document.add_paragraph()
 
@@ -69,15 +68,15 @@ class GenDocx:
 
     # -------------------------------------------------------------------------------------
     def add_register_table_title(self, ip, addr):
-        paragraph = self.add_summary_table_title(ip)
+        paragraph = self.add_caption_title(ip)
         # paragraph.paragraph_format.left_indent = -Cm(0.25)
         paragraph.add_run(': ')
-        self.markindexentry("OtiRegister:Name", paragraph)
+        self.add_mark_entry("OtiRegister:Name", paragraph)
         paragraph.add_run(f'{self.register_obj.get_ip_addr_name(ip, addr)} (')
-        self.markindexentry(f"OtiBaseAddress:{self.register_obj.get_ip_docParser_base_str(ip)}", paragraph)
-        self.markindexentry("OtiRegister:Addr", paragraph)
+        self.add_mark_entry(f"OtiBaseAddress:{self.register_obj.get_ip_docParser_base_str(ip)}", paragraph)
+        self.add_mark_entry("OtiRegister:Addr", paragraph)
         paragraph.add_run(f'0x{addr:04X}')
-        self.markindexentry("OtiRegister:AddrEnd", paragraph)
+        self.add_mark_entry("OtiRegister:AddrEnd", paragraph)
         paragraph.add_run(')')
         self.add_bookmark(paragraph=paragraph, bookmark_text="", bookmark_name=self.register_obj.get_ip_addr_name(ip, addr))
 
@@ -100,41 +99,42 @@ class GenDocx:
         hdr_cells[3].text = 'Type'
         hdr_cells[4].width = Cm(9.0)
         hdr_cells[4].text = 'Description'
-        # for field in sorted(self.register_obj.get_ip_addr_field_list(ip, addr), key=lambda item: int(re.search(r"[0-9]+", item).group()), reverse=True):
-        for field in sorted(self.register_obj.get_ip_addr_field_list(ip, addr)):
+        # a =  sorted(self.register_obj.get_ip_addr_field_list(ip, addr), key=lambda item: int(re.search(r"[0-9]+", str(item)).group()))
+
+        for field in self.register_obj.get_ip_addr_field_list(ip, addr):
             row_cells = table.add_row().cells
 
             # BITS
             row_cells[0].width = Cm(1.0)
             p = row_cells[0].paragraphs[0]
-            self.markindexentry("OtiRegField:Bits", p)
+            self.add_mark_entry("OtiRegField:Bits", p)
             p.add_run(f"[{str(field).replace('-',':')}]")
 
             # NAME
             p = row_cells[1].paragraphs[0]
-            self.markindexentry("OtiRegField:Name", p)
+            self.add_mark_entry("OtiRegField:Name", p)
             p.add_run(self.register_obj.get_ip_addr_field_name(ip, addr, field))
-            self.markindexentry("Oti", p)
+            self.add_mark_entry("Oti", p)
 
             # Default
             p = row_cells[2].paragraphs[0]
-            self.markindexentry("OtiRegField:Default", p)
+            self.add_mark_entry("OtiRegField:Default", p)
             p.add_run(self.register_obj.get_ip_addr_field_reset(ip, addr, field))
-            self.markindexentry("Oti", p)
+            self.add_mark_entry("Oti", p)
 
             # Type
             row_cells[3].width = Cm(1.0)
             p = row_cells[3].paragraphs[0]
-            self.markindexentry("OtiRegField:Type", p)
+            self.add_mark_entry("OtiRegField:Type", p)
             p.add_run(self.register_obj.get_ip_addr_field_type(ip, addr, field))
-            self.markindexentry("Oti", p)
+            self.add_mark_entry("Oti", p)
 
             row_cells[4].width = Cm(9.0)
             p = row_cells[4].paragraphs[0]
             p.add_run(self.register_obj.get_ip_addr_field_desc(ip, addr, field))
 
     # -------------------------------------------------------------------------------------
-    def add_summary_table_title(self, ip, include_chapter_nb=False):
+    def add_caption_title(self, ip, include_chapter_nb=False):
         # Create a paragraph
         paragraph = self.document.add_paragraph('Table ', style='Caption')
         paragraph.paragraph_format.left_indent = -Cm(0.25)
@@ -188,32 +188,31 @@ class GenDocx:
             row_cells[2].width = Cm(19.0)
 
     # -------------------------------------------------------------------------------------
-    @staticmethod
-    def markindexentry(entry, paragraph):
+    def add_mark_entry(self, text, paragraph):
         run = paragraph.add_run()
         r = run._r
         font = run.font
-        font.color.rgb = docx.shared.RGBColor(255, 192, 0)
-        fldChar = docx.oxml.OxmlElement('w:fldChar')
-        fldChar.set(docx.oxml.ns.qn('w:fldCharType'), 'begin')
-        r.append(fldChar)
+        font.color.rgb = self.MARK_ENTRY_COLOR
+        fldchar = docx.oxml.OxmlElement('w:fldChar')
+        fldchar.set(docx.oxml.ns.qn('w:fldCharType'), 'begin')
+        r.append(fldchar)
 
         run = paragraph.add_run()
         r = run._r
         font = run.font
-        font.color.rgb = docx.shared.RGBColor(255, 192, 0)
-        instrText = docx.oxml.OxmlElement('w:instrText')
-        instrText.set(docx.oxml.ns.qn('xml:space'), 'preserve')
-        instrText.text = ' XE "%s" ' % (entry)
-        r.append(instrText)
+        font.color.rgb = self.MARK_ENTRY_COLOR
+        instrtext = docx.oxml.OxmlElement('w:instrText')
+        instrtext.set(docx.oxml.ns.qn('xml:space'), 'preserve')
+        instrtext.text = ' XE "%s" ' % text
+        r.append(instrtext)
 
         run = paragraph.add_run()
         r = run._r
         font = run.font
-        font.color.rgb = docx.shared.RGBColor(255, 192, 0)
-        fldChar = docx.oxml.OxmlElement('w:fldChar')
-        fldChar.set(docx.oxml.ns.qn('w:fldCharType'), 'end')
-        r.append(fldChar)
+        font.color.rgb = self.MARK_ENTRY_COLOR
+        fldchar = docx.oxml.OxmlElement('w:fldChar')
+        fldchar.set(docx.oxml.ns.qn('w:fldCharType'), 'end')
+        r.append(fldchar)
 
     # -------------------------------------------------------------------------------------
     @staticmethod
@@ -236,7 +235,7 @@ class GenDocx:
 
     # -------------------------------------------------------------------------------------
     @staticmethod
-    def add_link(paragraph, link_to, text, tool_tip=None):
+    def add_link(paragraph, link_to, text=None, tool_tip=None):
         # create hyperlink node
         hyperlink = docx.oxml.shared.OxmlElement('w:hyperlink')
 
@@ -248,13 +247,11 @@ class GenDocx:
             hyperlink.set(docx.oxml.shared.qn('w:tooltip'), tool_tip, )
 
         new_run = docx.oxml.shared.OxmlElement('w:r')
-        rpr = docx.oxml.shared.OxmlElement('w:rPr')
-        new_run.append(rpr)
+        new_run.append(docx.oxml.shared.OxmlElement('w:rPr'))
         new_run.text = text
         hyperlink.append(new_run)
         r = paragraph.add_run()
         r._r.append(hyperlink)
-        # r.font.name = "Calibri"
         r.font.color.theme_color = MSO_THEME_COLOR_INDEX.HYPERLINK
-        # r.font.underline = True
+        
     # -------------------------------------------------------------------------------------

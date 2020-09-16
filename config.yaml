@@ -80,3 +80,53 @@ IPv4:
                     name: "DFLT_GW_TABLE_ID_VALID"
                     rst: "0x0"
                     desc: "Indicate the IPv4 default gateway MAC address is resolved"
+
+        0x20:
+            name: "TEST1"
+            type: "RO"
+            desc: "TEST1"
+            field:
+                31:
+                    name: "DFLT_GW_TABLE_ID_VALID31"
+                    rst: "0x0"
+                    desc: "Indicate the IPv4 default gateway MAC address is resolved"
+
+                9-5:
+                    name: "DFLT_GW_TABLE_ID_VALID9_5"
+                    rst: "0x0"
+                    desc: "Indicate the IPv4 default gateway MAC address is resolved"
+
+                3:
+                    name: "DFLT_GW_TABLE_ID_VALID3"
+                    rst: "0x0"
+                    desc: "Indicate the IPv4 default gateway MAC address is resolved"
+
+                0:
+                    name: "DFLT_GW_TABLE_ID_VALID0"
+                    rst: "0x0"
+                    desc: "Indicate the IPv4 default gateway MAC address is resolved"
+
+
+
+        0x24:
+            name: "TEST2"
+            type: "RO"
+            desc: "TEST1"
+            field:
+                30:
+                    name: "DFLT_GW_TABLE_ID_VALID30"
+                    rst: "0x0"
+                    desc: "Indicate the IPv4 default gateway MAC address is resolved"
+
+                29-9:
+                    name: "DFLT_GW_TABLE_ID_VALID29_9"
+                    rst: "0x0"
+                    desc: "Indicate the IPv4 default gateway MAC address is resolved"
+
+                1:
+                    name: "DFLT_GW_TABLE_ID_VALID1"
+                    rst: "0x0"
+                    desc: "Indicate the IPv4 default gateway MAC address is resolved"
+
+
+

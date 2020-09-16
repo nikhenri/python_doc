@@ -15,6 +15,8 @@ class Register:
 
     # -------------------------------------------------------------------------------------
     # Quick check to see if the required field are there
+    # @TODO check field overlap
+    # @TODO check reg and field name unique
     def validate(self):
         IP_KEYS = ['docParser_base_str', 'register']
         REGISTER_KEYS = ['name', 'type', 'desc', 'field']
