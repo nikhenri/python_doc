@@ -17,6 +17,7 @@ class Register:
     # Quick check to see if the required field are there
     # @TODO check field overlap
     # @TODO check reg and field name unique
+    # @TODO cehck that field are in decroissant
     def validate(self):
         IP_KEYS = ['docParser_base_str', 'register']
         REGISTER_KEYS = ['name', 'type', 'desc', 'field']
@@ -50,7 +51,7 @@ class Register:
 
     # -------------------------------------------------------------------------------------
     def get_ip_addr_list(self, ip):
-        return self.reg_dict[ip]['register'].keys()
+        return list(self.reg_dict[ip]['register'].keys())
 
     # -------------------------------------------------------------------------------------
     def get_ip_addr_type(self, ip, addr):
@@ -70,7 +71,7 @@ class Register:
 
     # -------------------------------------------------------------------------------------
     def get_ip_addr_field_list(self, ip, addr):
-        return self.reg_dict[ip]['register'][addr]['field'].keys()
+        return list(self.reg_dict[ip]['register'][addr]['field'].keys())
 
     # -------------------------------------------------------------------------------------
     def get_ip_addr_field_name(self, ip, addr, field):

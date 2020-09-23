@@ -43,18 +43,18 @@ class GenDocx:
             self.add_ip_docmentation(ip)
 
         self.document.save(f'{filename}.docx')
-        # self.set_updatefields_true(f'{filename}.docx')
-
-        import zipfile
-        #zip = zipfile.ZipFile(f'{filename}.docx')
-        #zip.extractall()
-        #zip.extract('word/document.xml', "./")
-        with zipfile.ZipFile(f'{filename}.docx') as z:
-            with open(f'{filename}.xml', 'wb') as f:
-                f.write(z.read('word/document.xml'))
-
+        # # self.set_updatefields_true(f'{filename}.docx')
+        #
+        # import zipfile
+        # #zip = zipfile.ZipFile(f'{filename}.docx')
+        # #zip.extractall()
+        # #zip.extract('word/document.xml', "./")
+        # with zipfile.ZipFile(f'{filename}.docx') as z:
+        #     with open(f'{filename}.xml', 'wb') as f:
+        #         f.write(z.read('word/document.xml'))
+        #
         if open_generate_file:
-            os.startfile(f'{filename}.docx')
+             os.startfile(f'{filename}.docx')
 
     # -------------------------------------------------------------------------------------
     def add_ip_docmentation(self, ip):
@@ -71,7 +71,7 @@ class GenDocx:
     # -------------------------------------------------------------------------------------
     def add_register_table(self, ip):
         for addr in self.register_obj.get_ip_addr_list(ip):
-            print(f"Generate register table for '{ip}' of addr '{addr}'")
+            #print(f"Generate register table for '{ip}' of addr '{addr}'")
             self.add_register_table_title(ip, addr)
             self.add_register_table_content(ip, addr)
             self.document.add_paragraph()
@@ -111,37 +111,76 @@ class GenDocx:
         hdr_cells[4].text = 'Description'
         # a =  sorted(self.register_obj.get_ip_addr_field_list(ip, addr), key=lambda item: int(re.search(r"[0-9]+", str(item)).group()))
 
-        for field in self.register_obj.get_ip_addr_field_list(ip, addr):
+        def inser_a_row(table, bits, name, default, type, description):
             row_cells = table.add_row().cells
 
-            # BITS
+            # Bits
             row_cells[0].width = Cm(1.0)
             p = row_cells[0].paragraphs[0]
             self.add_mark_entry("OtiRegField:Bits", p)
-            p.add_run(f"[{str(field).replace('-',':')}]")
+            p.add_run(bits)
 
-            # NAME
+            # Name
             p = row_cells[1].paragraphs[0]
             self.add_mark_entry("OtiRegField:Name", p)
-            p.add_run(self.register_obj.get_ip_addr_field_name(ip, addr, field))
+            p.add_run(name)
             self.add_mark_entry("Oti", p)
 
             # Default
             p = row_cells[2].paragraphs[0]
             self.add_mark_entry("OtiRegField:Default", p)
-            p.add_run(self.register_obj.get_ip_addr_field_reset(ip, addr, field))
+            p.add_run(default)
             self.add_mark_entry("Oti", p)
 
             # Type
             row_cells[3].width = Cm(1.0)
             p = row_cells[3].paragraphs[0]
             self.add_mark_entry("OtiRegField:Type", p)
-            p.add_run(self.register_obj.get_ip_addr_field_type(ip, addr, field))
+            p.add_run(type)
             self.add_mark_entry("Oti", p)
 
+            # Decription
             row_cells[4].width = Cm(9.0)
             p = row_cells[4].paragraphs[0]
-            p.add_run(self.register_obj.get_ip_addr_field_desc(ip, addr, field))
+            p.add_run(description)
+
+        def filter_1bits_vector(str):
+            split = str[1:-1].split(":")
+            if split[0] == split[1]:
+                return f"[{split[0]}]"
+            return str
+        ip_addr_field_list = self.register_obj.get_ip_addr_field_list(ip, addr)
+        for i in range(len(ip_addr_field_list)):
+            field = ip_addr_field_list[i]
+            if "-" in str(field):
+                (field_high, field_low) = field.split("-")
+            else:
+                field_high = field_low = field
+            if i== 0 and int(field_high) != 31:
+                print(f"{ip}:0x{addr:X} => insert reserved1 31:{int(field_high)+1}")
+                inser_a_row(table, filter_1bits_vector(f"[31:{int(field_high)+1}]"), "RSD", "0x0", self.register_obj.get_ip_addr_field_type(ip, addr, field), "Reserved")
+
+            inser_a_row(table,
+                        f"[{str(field).replace('-', ':')}]",
+                        self.register_obj.get_ip_addr_field_name(ip, addr, field),
+                        self.register_obj.get_ip_addr_field_reset(ip, addr, field),
+                        self.register_obj.get_ip_addr_field_type(ip, addr, field),
+                        self.register_obj.get_ip_addr_field_desc(ip, addr, field)
+                        )
+
+
+            if i == len(ip_addr_field_list)-1 and int(field_low) != 0:
+                print(f"{ip}:0x{addr:X} => insert reserved2 {int(field_low)-1}:0")
+                inser_a_row(table, filter_1bits_vector(f"[{int(field_low)-1}:0]"), "RSD", "0x0", self.register_obj.get_ip_addr_field_type(ip, addr, field), "Reserved")
+            if i != len(ip_addr_field_list)-1:
+                fieldz = str(ip_addr_field_list[i+1])
+                if "-" in str(fieldz):
+                    (fieldz_high, fieldz_low) = fieldz.split("-")
+                else:
+                    fieldz_high = fieldz_low = fieldz
+                if int(field_low) -1 != int(fieldz_high):
+                    print(f"{ip}:0x{addr:X} => insert reserved3 {int(field_low) -1}:{int(fieldz_high)+1}")
+                    inser_a_row(table, filter_1bits_vector(f"[{int(field_low) -1}:{int(fieldz_high)+1}]"), "RSD", "0x0", self.register_obj.get_ip_addr_field_type(ip, addr, field), "Reserved")
 
     # -------------------------------------------------------------------------------------
     def add_caption_title(self, ip, include_chapter_nb=False):
