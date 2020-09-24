@@ -38,8 +38,7 @@ class Register:
                         (high, low) = field_key.split("-")
                     else:
                         (high, low) = (field_key, -1)
-                    if int(high) >= 32:
-                        raise Exception(f"For '{module_key}' register addr '0x{addr_key:X}' field '{field_key}' error in field: Can't be higher then 32bits (31)")
+
                     if int(high) <= int(low):
                         raise Exception(f"For '{module_key}' register addr '0x{addr_key:X}' field '{field_key}' error in field: Range is negatif or null")
                     if set(field_obj.keys()) != set(field_keys):

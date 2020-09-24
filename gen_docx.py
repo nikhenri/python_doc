@@ -149,9 +149,11 @@ class GenDocx:
             return f"[{high}:{low}]"
 
         field_list = list(self.register_dict[module]['register'][register]['field'].keys())
+
         first_field = self.register_dict[module]['register'][register]['field'][field_list[0]]
-        if first_field['high'] != 31:
-            inser_a_row(table, range_string(31, first_field['high']+1), "RSD", "0x0", first_field["type"], "Reserved")
+        register_high = int(first_field['high']/32+1)*32-1
+        if first_field['high'] != register_high:
+            inser_a_row(table, range_string(register_high, first_field['high']+1), "RSD", "0x0", first_field["type"], "Reserved")
 
         for i in range(len(field_list)):
             field = self.register_dict[module]['register'][register]['field'][field_list[i]]

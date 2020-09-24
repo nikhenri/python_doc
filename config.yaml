@@ -138,3 +138,13 @@ IPv4:
                     rst: "0x0"
                     desc: "Indicate the IPv4 default gateway MAC address is resolved"
 
+
+        0x28:
+            name: "TEST4"
+            type: "RW"
+            desc: "TEST4"
+            field:
+                64-63:
+                    name: "DFLT_GW_TABLE_ID_VALID64"
+                    rst: "0x0"
+                    desc: "Indicate nothing"
