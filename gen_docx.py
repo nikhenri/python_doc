@@ -22,14 +22,15 @@ from docx.enum.dml import MSO_THEME_COLOR_INDEX
 from docx.oxml import OxmlElement
 import lxml
 
+
 # -------------------------------------------------------------------------------------
 class GenDocx:
     DOC_PARSER_CAPTION = 1
     MARK_ENTRY_COLOR = docx.shared.RGBColor(255, 192, 0)
 
     # -------------------------------------------------------------------------------------
-    def __init__(self, register_obj):
-        self.register_obj = register_obj
+    def __init__(self, register_dict):
+        self.register_dict = register_dict
         self.document = None
 
     # -------------------------------------------------------------------------------------
@@ -39,8 +40,8 @@ class GenDocx:
         for section in sections:
             section.left_margin = Cm(2.0)
 
-        for ip in self.register_obj.get_ip_list():
-            self.add_ip_docmentation(ip)
+        for module in self.register_dict.keys():
+            self.add_ip_docmentation(module)
 
         self.document.save(f'{filename}.docx')
         # # self.set_updatefields_true(f'{filename}.docx')
@@ -54,44 +55,42 @@ class GenDocx:
         #         f.write(z.read('word/document.xml'))
         #
         if open_generate_file:
-             os.startfile(f'{filename}.docx')
+            os.startfile(f'{filename}.docx')
 
     # -------------------------------------------------------------------------------------
-    def add_ip_docmentation(self, ip):
-        self.add_summary_table(ip)
-        self.add_register_table(ip)
+    def add_ip_docmentation(self, module):
+        self.add_summary_table(module)
+        self.add_register_table(module)
 
     # -------------------------------------------------------------------------------------
-    def add_summary_table(self, ip):
-        print(f"Generate summary table for '{ip}'")
-        self.add_caption_title(ip)
-        self.add_summary_table_content(ip)
+    def add_summary_table(self, module):
+        self.add_caption_title(module)
+        self.add_summary_table_content(module)
         self.document.add_paragraph()
 
     # -------------------------------------------------------------------------------------
-    def add_register_table(self, ip):
-        for addr in self.register_obj.get_ip_addr_list(ip):
-            #print(f"Generate register table for '{ip}' of addr '{addr}'")
-            self.add_register_table_title(ip, addr)
-            self.add_register_table_content(ip, addr)
+    def add_register_table(self, module):
+        for register in self.register_dict[module]['register'].keys():
+            self.add_register_table_title(module, register)
+            self.add_register_table_content(module, register)
             self.document.add_paragraph()
 
     # -------------------------------------------------------------------------------------
-    def add_register_table_title(self, ip, addr):
-        paragraph = self.add_caption_title(ip)
+    def add_register_table_title(self, module, register):
+        paragraph = self.add_caption_title(module)
         # paragraph.paragraph_format.left_indent = -Cm(0.25)
         paragraph.add_run(': ')
         self.add_mark_entry("OtiRegister:Name", paragraph)
-        paragraph.add_run(f'{self.register_obj.get_ip_addr_name(ip, addr)} (')
-        self.add_mark_entry(f"OtiBaseAddress:{self.register_obj.get_ip_docParser_base_str(ip)}", paragraph)
+        paragraph.add_run(f"{register} (")
+        self.add_mark_entry(f"OtiBaseAddress:{self.register_dict[module]['docParser_base_str']}", paragraph)
         self.add_mark_entry("OtiRegister:Addr", paragraph)
-        paragraph.add_run(f'0x{addr:04X}')
+        paragraph.add_run(f'0x{self.register_dict[module]["register"][register]["addr"]:04X}')
         self.add_mark_entry("OtiRegister:AddrEnd", paragraph)
         paragraph.add_run(')')
-        self.add_bookmark(paragraph=paragraph, bookmark_text="", bookmark_name=self.register_obj.get_ip_addr_name(ip, addr))
+        self.add_bookmark(paragraph=paragraph, bookmark_text="", bookmark_name=register)
 
     # -------------------------------------------------------------------------------------
-    def add_register_table_content(self, ip, addr):
+    def add_register_table_content(self, module, register):
         table = self.document.add_table(rows=1, cols=5)
         # table.left_margin  = Cm(2.25)
         shading_elm = []
@@ -111,8 +110,8 @@ class GenDocx:
         hdr_cells[4].text = 'Description'
         # a =  sorted(self.register_obj.get_ip_addr_field_list(ip, addr), key=lambda item: int(re.search(r"[0-9]+", str(item)).group()))
 
-        def inser_a_row(table, bits, name, default, type, description):
-            row_cells = table.add_row().cells
+        def inser_a_row(table_obj, bits, name, default, type, description):
+            row_cells = table_obj.add_row().cells
 
             # Bits
             row_cells[0].width = Cm(1.0)
@@ -144,46 +143,32 @@ class GenDocx:
             p = row_cells[4].paragraphs[0]
             p.add_run(description)
 
-        def filter_1bits_vector(str):
-            split = str[1:-1].split(":")
-            if split[0] == split[1]:
-                return f"[{split[0]}]"
-            return str
-        ip_addr_field_list = self.register_obj.get_ip_addr_field_list(ip, addr)
-        for i in range(len(ip_addr_field_list)):
-            field = ip_addr_field_list[i]
-            if "-" in str(field):
-                (field_high, field_low) = field.split("-")
-            else:
-                field_high = field_low = field
-            if i== 0 and int(field_high) != 31:
-                print(f"{ip}:0x{addr:X} => insert reserved1 31:{int(field_high)+1}")
-                inser_a_row(table, filter_1bits_vector(f"[31:{int(field_high)+1}]"), "RSD", "0x0", self.register_obj.get_ip_addr_field_type(ip, addr, field), "Reserved")
+        def range_string(high, low):  # convert [3:3] to [3]
+            if high == low:
+                return f"[{high}]"
+            return f"[{high}:{low}]"
 
-            inser_a_row(table,
-                        f"[{str(field).replace('-', ':')}]",
-                        self.register_obj.get_ip_addr_field_name(ip, addr, field),
-                        self.register_obj.get_ip_addr_field_reset(ip, addr, field),
-                        self.register_obj.get_ip_addr_field_type(ip, addr, field),
-                        self.register_obj.get_ip_addr_field_desc(ip, addr, field)
-                        )
+        field_list = list(self.register_dict[module]['register'][register]['field'].keys())
+        first_field = self.register_dict[module]['register'][register]['field'][field_list[0]]
+        if first_field['high'] != 31:
+            inser_a_row(table, range_string(31, first_field['high']+1), "RSD", "0x0", first_field["type"], "Reserved")
 
+        for i in range(len(field_list)):
+            field = self.register_dict[module]['register'][register]['field'][field_list[i]]
 
-            if i == len(ip_addr_field_list)-1 and int(field_low) != 0:
-                print(f"{ip}:0x{addr:X} => insert reserved2 {int(field_low)-1}:0")
-                inser_a_row(table, filter_1bits_vector(f"[{int(field_low)-1}:0]"), "RSD", "0x0", self.register_obj.get_ip_addr_field_type(ip, addr, field), "Reserved")
-            if i != len(ip_addr_field_list)-1:
-                fieldz = str(ip_addr_field_list[i+1])
-                if "-" in str(fieldz):
-                    (fieldz_high, fieldz_low) = fieldz.split("-")
-                else:
-                    fieldz_high = fieldz_low = fieldz
-                if int(field_low) -1 != int(fieldz_high):
-                    print(f"{ip}:0x{addr:X} => insert reserved3 {int(field_low) -1}:{int(fieldz_high)+1}")
-                    inser_a_row(table, filter_1bits_vector(f"[{int(field_low) -1}:{int(fieldz_high)+1}]"), "RSD", "0x0", self.register_obj.get_ip_addr_field_type(ip, addr, field), "Reserved")
+            inser_a_row(table, range_string(field['high'], field['low']), field_list[i], field['reset'], field['type'], field['desc'])
+
+            if i != len(field_list)-1:
+                next_field = self.register_dict[module]['register'][register]['field'][field_list[i+1]]
+                if field['low']-1 != next_field['high']:
+                    inser_a_row(table, range_string(field['low']-1, next_field['high']), "RSD", "0x0", field["type"], "Reserved")
+
+        last_field = self.register_dict[module]['register'][register]['field'][field_list[-1]]
+        if last_field['low'] != 0:
+            inser_a_row(table, range_string(last_field['low']-1, 0), "RSD", "0x0", last_field["type"], "Reserved")
 
     # -------------------------------------------------------------------------------------
-    def add_caption_title(self, ip, include_chapter_nb=False):
+    def add_caption_title(self, register, include_chapter_nb=False):
         # Create a paragraph
         paragraph = self.document.add_paragraph('Table ', style='Caption')
         paragraph.paragraph_format.left_indent = -Cm(0.25)
@@ -206,11 +191,11 @@ class GenDocx:
             if include_chapter_nb:
                 paragraph.add_run("-")
 
-        paragraph.add_run(f': {ip} register set')
+        paragraph.add_run(f': {register} register set')
         return paragraph
     
     # -------------------------------------------------------------------------------------
-    def add_summary_table_content(self, ip):
+    def add_summary_table_content(self, module):
         table = self.document.add_table(rows=1, cols=3)
         shading_elm = []
         for i in range(len(table.columns)):  # put the background gray for the 1er row
@@ -226,14 +211,13 @@ class GenDocx:
         hdr_cells[2].text = 'Name'
         hdr_cells[2].width = Cm(19.0)
 
-        for addr in self.register_obj.get_ip_addr_list(ip):
+        for register in self.register_dict[module]['register'].keys():
             row_cells = table.add_row().cells
-            row_cells[0].text = f'0x{addr:X}'
+            row_cells[0].text = f"0x{self.register_dict[module]['register'][register]['addr']:X}"
             row_cells[0].width = Cm(4.0)
-            row_cells[1].text = self.register_obj.get_ip_addr_type(ip, addr)
+            row_cells[1].text = self.register_dict[module]['register'][register]['type']
             row_cells[1].width = Cm(1.0)
-            reg_name = self.register_obj.get_ip_addr_name(ip, addr)
-            self.add_link(paragraph=row_cells[2].paragraphs[0], link_to=reg_name, text=reg_name, tool_tip=reg_name)
+            self.add_link(paragraph=row_cells[2].paragraphs[0], link_to=register, text=register, tool_tip=register)
             row_cells[2].width = Cm(19.0)
 
     # -------------------------------------------------------------------------------------

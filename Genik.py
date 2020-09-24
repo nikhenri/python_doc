@@ -31,11 +31,11 @@ reg_dict = dserialzer_obj.deserialze(FILENAME)
 print(f"Done!")
 
 print(f"Validate config...")
-register_obj = register.Register(reg_dict)
+register_dict = register.Register(reg_dict).get_register_dict()
 print(f"Done!")
 
 print(f"Generate .docx...")
-gen_docx_obj = gen_docx.GenDocx(register_obj).generate('register', True)
+gen_docx_obj = gen_docx.GenDocx(register_dict).generate('register', True)
 print(f"Done!")
 
 #print(f"Generate .svh...")
