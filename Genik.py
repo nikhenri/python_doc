@@ -10,6 +10,8 @@ import sys
 
 import os
 import subprocess
+import pathlib
+import glob
 
 import deserialzer
 import register
@@ -33,16 +35,16 @@ print(f"")
 print(f"Genik path: " + path)
 print(f"Python path: " + sys.executable.replace('\\', '/') + f" (v{sys.version.split()[0]})")
 
-print(f"Deserialzer {FILENAME}...")
-reg_dict = deserialzer.Deserialzer().deserialze(FILENAME)
-print(f"Done!")
-
-print(f"Validate config...")
-register_dict = register.Register(reg_dict).get_register_dict()
-print(f"Done!")
+full_reg_dict = {}
+for filename in glob.glob('*.yaml'):
+    print(f"Deserialzer {filename}...")
+    reg_dict = deserialzer.deserialze(filename)
+    print(f"Validate ...")
+    full_reg_dict[pathlib.Path(filename).stem] = register.get_register_dict(reg_dict)
+    print(f"Done!")
 
 print(f"Generate .docx...")
-gen_docx_obj = gen_docx.GenDocx(register_dict).generate(FILENAME_NO_EXT, True)
+gen_docx_obj = gen_docx.GenDocx(full_reg_dict['tcp_ip']).generate(FILENAME_NO_EXT, True)
 print(f"Done!")
 
 subprocess.check_call(["docparser", "-c", "OTI_datasheet_parser.ini", f"{FILENAME_NO_EXT}.xml", "outputReg.txt"])

@@ -41,11 +41,11 @@ class GenDocx:
         for section in sections:
             section.left_margin = Cm(2.0)
 
-        self.add_module_table(filename)
-        for module in self.register_dict.keys():
-            p = self.document.add_heading(module, level=0)
-            self.add_bookmark(paragraph=p, bookmark_text="", bookmark_name=module)
-            self.add_ip_docmentation(module)
+        self.add_decoder_table(filename)
+        for decoder in self.register_dict.keys():
+            p = self.document.add_heading(f"{decoder} (0x{self.register_dict[decoder]['addr']:X})", level=0)
+            self.add_bookmark(paragraph=p, bookmark_text="", bookmark_name=decoder)
+            self.add_ip_docmentation(decoder)
             self.document.add_page_break()
 
         self.document.save(f'{filename}.docx')
@@ -59,9 +59,9 @@ class GenDocx:
             os.startfile(f'{filename}.docx')
 
     # -------------------------------------------------------------------------------------
-    def add_module_table(self, filename):
+    def add_decoder_table(self, filename):
         self.document.add_heading(filename.upper() + " registers", level=0)
-        table = self.document.add_table(rows=1, cols=1)
+        table = self.document.add_table(rows=1, cols=2)
         shading_elm = []
         for i in range(len(table.columns)):  # put the background gray for the 1er row
             shading_elm.append(docx.oxml.parse_xml(r'<w:shd {} w:fill="d9d9d9"/>'.format(docx.oxml.ns.nsdecls('w'))))
@@ -69,49 +69,51 @@ class GenDocx:
 
         table.style = 'Table Grid'  # add border
         hdr_cells = table.rows[0].cells
-        hdr_cells[0].text = 'Modules'
+        hdr_cells[0].text = 'decoders'
+        hdr_cells[1].text = 'Base address'
         #hdr_cells[2].width = Cm(19.0)
 
-        for module in self.register_dict.keys():
+        for decoder in self.register_dict.keys():
             row_cells = table.add_row().cells
-            self.add_link(paragraph=row_cells[0].paragraphs[0], link_to=module, text=module, tool_tip=module)
+            self.add_link(paragraph=row_cells[0].paragraphs[0], link_to=decoder, text=decoder, tool_tip=decoder)
+            row_cells[1].paragraphs[0].add_run(f"0x{self.register_dict[decoder]['addr']:X}")
             #row_cells[0].width = Cm(19.0)
         self.document.add_page_break()
 
     # -------------------------------------------------------------------------------------
-    def add_ip_docmentation(self, module):
-        self.add_summary_table(module)
-        self.add_register_table(module)
+    def add_ip_docmentation(self, decoder):
+        self.add_summary_table(decoder)
+        self.add_register_table(decoder)
 
     # -------------------------------------------------------------------------------------
-    def add_summary_table(self, module):
-        self.add_caption_title(module)
-        self.add_summary_table_content(module)
+    def add_summary_table(self, decoder):
+        self.add_caption_title(decoder)
+        self.add_summary_table_content(decoder)
         self.document.add_paragraph()
 
     # -------------------------------------------------------------------------------------
-    def add_register_table(self, module):
-        for register in self.register_dict[module]['register'].keys():
-            self.add_register_table_title(module, register)
-            self.add_register_table_content(module, register)
+    def add_register_table(self, decoder):
+        for register in self.register_dict[decoder]['register'].keys():
+            self.add_register_table_title(decoder, register)
+            self.add_register_table_content(decoder, register)
             self.document.add_paragraph()
 
     # -------------------------------------------------------------------------------------
-    def add_register_table_title(self, module, register):
-        paragraph = self.add_caption_title(module)
+    def add_register_table_title(self, decoder, register):
+        paragraph = self.add_caption_title(decoder)
         # paragraph.paragraph_format.left_indent = -Cm(0.25)
         paragraph.add_run(': ')
         self.add_mark_entry("OtiRegister:Name", paragraph)
         paragraph.add_run(f"{register} (")
-        self.add_mark_entry(f"OtiBaseAddress:{self.register_dict[module]['docParser_base_str']}", paragraph)
+        self.add_mark_entry(f"OtiBaseAddress:OTI_{decoder.upper()}_BASE_ADD", paragraph)
         self.add_mark_entry("OtiRegister:Addr", paragraph)
-        paragraph.add_run(f'0x{self.register_dict[module]["register"][register]["addr"]:04X}')
+        paragraph.add_run(f'0x{self.register_dict[decoder]["register"][register]["addr"]:04X}')
         self.add_mark_entry("OtiRegister:AddrEnd", paragraph)
         paragraph.add_run(')')
         self.add_bookmark(paragraph=paragraph, bookmark_text="", bookmark_name=register)
 
     # -------------------------------------------------------------------------------------
-    def add_register_table_content(self, module, register):
+    def add_register_table_content(self, decoder, register):
         table = self.document.add_table(rows=1, cols=5)
         # table.left_margin  = Cm(2.25)
         shading_elm = []
@@ -161,32 +163,31 @@ class GenDocx:
 
             # Decription
             row_cells[4].width = Cm(9.0)
-            p = row_cells[4].paragraphs[0]
-            p.add_run(description)
+            row_cells[4].paragraphs[0].add_run(description)
 
         def range_string(high, low):  # convert [3:3] to [3]
             if high == low:
                 return f"[{high}]"
             return f"[{high}:{low}]"
 
-        field_list = list(self.register_dict[module]['register'][register]['field'].keys())
+        field_list = list(self.register_dict[decoder]['register'][register]['field'].keys())
 
-        first_field = self.register_dict[module]['register'][register]['field'][field_list[0]]
+        first_field = self.register_dict[decoder]['register'][register]['field'][field_list[0]]
         register_high = int(first_field['high']/32+1)*32-1
         if first_field['high'] != register_high:
             inser_a_row(table, range_string(register_high, first_field['high']+1), "RSVD", "0x0", first_field["type"], "Reserved")
 
         for i in range(len(field_list)):
-            field = self.register_dict[module]['register'][register]['field'][field_list[i]]
+            field = self.register_dict[decoder]['register'][register]['field'][field_list[i]]
 
             inser_a_row(table, range_string(field['high'], field['low']), field_list[i], field['reset'], field['type'], field['desc'])
 
             if i != len(field_list)-1:
-                next_field = self.register_dict[module]['register'][register]['field'][field_list[i+1]]
+                next_field = self.register_dict[decoder]['register'][register]['field'][field_list[i+1]]
                 if field['low']-1 != next_field['high']:
                     inser_a_row(table, range_string(field['low']-1, next_field['high']), "RSVD", "0x0", field["type"], "Reserved")
 
-        last_field = self.register_dict[module]['register'][register]['field'][field_list[-1]]
+        last_field = self.register_dict[decoder]['register'][register]['field'][field_list[-1]]
         if last_field['low'] != 0:
             inser_a_row(table, range_string(last_field['low']-1, 0), "RSVD", "0x0", last_field["type"], "Reserved")
 
@@ -218,7 +219,7 @@ class GenDocx:
         return paragraph
     
     # -------------------------------------------------------------------------------------
-    def add_summary_table_content(self, module):
+    def add_summary_table_content(self, decoder):
         table = self.document.add_table(rows=1, cols=3)
         shading_elm = []
         for i in range(len(table.columns)):  # put the background gray for the 1er row
@@ -234,11 +235,11 @@ class GenDocx:
         hdr_cells[2].text = 'Name'
         hdr_cells[2].width = Cm(19.0)
 
-        for register in self.register_dict[module]['register'].keys():
+        for register in self.register_dict[decoder]['register'].keys():
             row_cells = table.add_row().cells
-            row_cells[0].text = f"0x{self.register_dict[module]['register'][register]['addr']:X}"
+            row_cells[0].text = f"0x{self.register_dict[decoder]['register'][register]['addr']:X}"
             row_cells[0].width = Cm(4.0)
-            row_cells[1].text = self.register_dict[module]['register'][register]['type']
+            row_cells[1].text = self.register_dict[decoder]['register'][register]['type']
             row_cells[1].width = Cm(1.0)
             self.add_link(paragraph=row_cells[2].paragraphs[0], link_to=register, text=register, tool_tip=register)
             row_cells[2].width = Cm(19.0)
