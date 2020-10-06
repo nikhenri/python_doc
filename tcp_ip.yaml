@@ -11,7 +11,7 @@ decoder:
                 field:
                     31-0:
                         name: "IP_ADD"
-                        rst: "0x13356219"
+                        rst: 0x13356219
                         desc: "ip address of offload engine"
 
             0x4:
@@ -21,7 +21,7 @@ decoder:
                 field:
                     31-0:
                         name: "SUBNET_MASK"
-                        rst: "0XFFFFFF00"
+                        rst: 0xFFFFFF00
                         desc: "sub net mask"
 
             0x8:
@@ -31,7 +31,7 @@ decoder:
                 field:
                     31-0:
                         name: "DFLT_GW"
-                        rst: "0x0"
+                        rst: 0x0
                         desc: "default gateway"
 
             0xC:
@@ -41,7 +41,7 @@ decoder:
                 field:
                     31-0:
                         name: "TX_FRAME_CNT"
-                        rst: "0x0"
+                        rst: 0x0
                         desc: "increment at each frame sent to l2"
 
             0x10:
@@ -51,7 +51,7 @@ decoder:
                 field:
                     31-0:
                         name: "RX_FRAME_CNT"
-                        rst: "0x0"
+                        rst: 0x0
                         desc: "increment at each frame received from l2. increment even frame contain error"
 
             0x14:
@@ -61,7 +61,7 @@ decoder:
                 field:
                     31-0:
                         name: "RX_ERROR_CHECKSUM_CNT"
-                        rst: "0x0"
+                        rst: 0x0
                         desc: "increment each time a checksum error is detected in the ipv4 header"
 
             0x18:
@@ -71,7 +71,7 @@ decoder:
                 field:
                     31-0:
                         name: "RX_ERROR_HEADER_CNT"
-                        rst: "0x0"
+                        rst: 0x0
                         desc: "increment each time the ipv4 header version not equal to 4 or hls not equal to 5 or flags not equal to 2"
 
             0x1C:
@@ -81,7 +81,7 @@ decoder:
                 field:
                     0:
                         name: "DFLT_GW_TABLE_ID_VALID"
-                        rst: "0x0"
+                        rst: 0x0
                         desc: "Indicate the IPv4 default gateway MAC address is resolved"
 
     UDP:
@@ -94,7 +94,7 @@ decoder:
                 field:
                     0:
                         name: "WAIT_FOR_ARP_REPLY"
-                        rst: "0x13356219"
+                        rst: 0x0
                         desc: "Ask the drop manager to wait for ARP reply instead of dropping the packet if the cuckoo search fail"
 
             0x4:
@@ -104,15 +104,15 @@ decoder:
                 field:
                     2:
                         name: "DROP_MANAGER_WAITING_SEARCH"
-                        rst: "0x0"
+                        rst: 0x0
                         desc: "Drop manager is waiting for SEARCH reply to his request"
 
                     1:
                         name: "DROP_MANAGER_WAITING_ARP"
-                        rst: "0x0"
+                        rst: 0x0
                         desc: "Drop manager is waiting for ARP reply to his request"
 
                     0:
                         name: "DROP_MANAGER_WAITING_DGW"
-                        rst: "0x0"
+                        rst: 0x0
                         desc: "Drop manager is waiting for default gateway resolution"

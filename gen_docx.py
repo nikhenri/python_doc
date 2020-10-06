@@ -42,8 +42,8 @@ class GenDocx:
             section.left_margin = Cm(2.0)
 
         self.add_decoder_table(filename)
-        for decoder in self.register_dict.keys():
-            p = self.document.add_heading(f"{decoder} (0x{self.register_dict[decoder]['addr']:X})", level=0)
+        for decoder in self.register_dict['decoder'].keys():
+            p = self.document.add_heading(f"{decoder} (0x{self.register_dict['decoder'][decoder]['addr']:X})", level=0)
             self.add_bookmark(paragraph=p, bookmark_text="", bookmark_name=decoder)
             self.add_ip_docmentation(decoder)
             self.document.add_page_break()
@@ -73,10 +73,10 @@ class GenDocx:
         hdr_cells[1].text = 'Base address'
         #hdr_cells[2].width = Cm(19.0)
 
-        for decoder in self.register_dict.keys():
+        for decoder in self.register_dict['decoder'].keys():
             row_cells = table.add_row().cells
             self.add_link(paragraph=row_cells[0].paragraphs[0], link_to=decoder, text=decoder, tool_tip=decoder)
-            row_cells[1].paragraphs[0].add_run(f"0x{self.register_dict[decoder]['addr']:X}")
+            row_cells[1].paragraphs[0].add_run(f"0x{self.register_dict['decoder'][decoder]['addr']:X}")
             #row_cells[0].width = Cm(19.0)
         self.document.add_page_break()
 
@@ -93,7 +93,7 @@ class GenDocx:
 
     # -------------------------------------------------------------------------------------
     def add_register_table(self, decoder):
-        for register in self.register_dict[decoder]['register'].keys():
+        for register in self.register_dict['decoder'][decoder]['register'].keys():
             self.add_register_table_title(decoder, register)
             self.add_register_table_content(decoder, register)
             self.document.add_paragraph()
@@ -107,7 +107,7 @@ class GenDocx:
         paragraph.add_run(f"{register} (")
         self.add_mark_entry(f"OtiBaseAddress:OTI_{decoder.upper()}_BASE_ADD", paragraph)
         self.add_mark_entry("OtiRegister:Addr", paragraph)
-        paragraph.add_run(f'0x{self.register_dict[decoder]["register"][register]["addr"]:04X}')
+        paragraph.add_run(f'0x{self.register_dict["decoder"][decoder]["register"][register]["addr"]:04X}')
         self.add_mark_entry("OtiRegister:AddrEnd", paragraph)
         paragraph.add_run(')')
         self.add_bookmark(paragraph=paragraph, bookmark_text="", bookmark_name=register)
@@ -151,7 +151,7 @@ class GenDocx:
             # Default
             p = row_cells[2].paragraphs[0]
             self.add_mark_entry("OtiRegField:Default", p)
-            p.add_run(default)
+            p.add_run(f"0x{default:X}")
             self.add_mark_entry("Oti", p)
 
             # Type
@@ -170,26 +170,26 @@ class GenDocx:
                 return f"[{high}]"
             return f"[{high}:{low}]"
 
-        field_list = list(self.register_dict[decoder]['register'][register]['field'].keys())
+        field_list = list(self.register_dict['decoder'][decoder]['register'][register]['field'].keys())
 
-        first_field = self.register_dict[decoder]['register'][register]['field'][field_list[0]]
+        first_field = self.register_dict['decoder'][decoder]['register'][register]['field'][field_list[0]]
         register_high = int(first_field['high']/32+1)*32-1
         if first_field['high'] != register_high:
-            inser_a_row(table, range_string(register_high, first_field['high']+1), "RSVD", "0x0", first_field["type"], "Reserved")
+            inser_a_row(table, range_string(register_high, first_field['high']+1), "RSVD", 0x0, first_field["type"], "Reserved")
 
         for i in range(len(field_list)):
-            field = self.register_dict[decoder]['register'][register]['field'][field_list[i]]
+            field = self.register_dict['decoder'][decoder]['register'][register]['field'][field_list[i]]
 
             inser_a_row(table, range_string(field['high'], field['low']), field_list[i], field['reset'], field['type'], field['desc'])
 
             if i != len(field_list)-1:
-                next_field = self.register_dict[decoder]['register'][register]['field'][field_list[i+1]]
+                next_field = self.register_dict['decoder'][decoder]['register'][register]['field'][field_list[i+1]]
                 if field['low']-1 != next_field['high']:
-                    inser_a_row(table, range_string(field['low']-1, next_field['high']), "RSVD", "0x0", field["type"], "Reserved")
+                    inser_a_row(table, range_string(field['low']-1, next_field['high']), "RSVD", 0x0, field["type"], "Reserved")
 
-        last_field = self.register_dict[decoder]['register'][register]['field'][field_list[-1]]
+        last_field = self.register_dict['decoder'][decoder]['register'][register]['field'][field_list[-1]]
         if last_field['low'] != 0:
-            inser_a_row(table, range_string(last_field['low']-1, 0), "RSVD", "0x0", last_field["type"], "Reserved")
+            inser_a_row(table, range_string(last_field['low']-1, 0), "RSVD", 0x0, last_field["type"], "Reserved")
 
     # -------------------------------------------------------------------------------------
     def add_caption_title(self, register, include_chapter_nb=False):
@@ -235,11 +235,11 @@ class GenDocx:
         hdr_cells[2].text = 'Name'
         hdr_cells[2].width = Cm(19.0)
 
-        for register in self.register_dict[decoder]['register'].keys():
+        for register in self.register_dict['decoder'][decoder]['register'].keys():
             row_cells = table.add_row().cells
-            row_cells[0].text = f"0x{self.register_dict[decoder]['register'][register]['addr']:X}"
+            row_cells[0].text = f"0x{self.register_dict['decoder'][decoder]['register'][register]['addr']:X}"
             row_cells[0].width = Cm(4.0)
-            row_cells[1].text = self.register_dict[decoder]['register'][register]['type']
+            row_cells[1].text = self.register_dict['decoder'][decoder]['register'][register]['type']
             row_cells[1].width = Cm(1.0)
             self.add_link(paragraph=row_cells[2].paragraphs[0], link_to=register, text=register, tool_tip=register)
             row_cells[2].width = Cm(19.0)

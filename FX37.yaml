@@ -1,6 +1,7 @@
 ip:
     tcp_ip:
         nb: 2
-        base_addr: 0x100000
+        addr:   0x100000
+        offset:  0x10000
 
 decoder:
