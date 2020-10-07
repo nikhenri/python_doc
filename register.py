@@ -8,16 +8,20 @@
 # -------------------------------------------------------------------------------------
 def get_register_dict(reg_dict):
     ip_dict = {}
-    validate(reg_dict)
-    if reg_dict['decoder'] is not None:
-        ip_dict['decoder'] = {}
-        for decoder in reg_dict['decoder'].keys():
-            ip_dict['decoder'][decoder] = get_decoder_info(reg_dict['decoder'][decoder])
+    for module in reg_dict.keys():
+        validate(reg_dict[module])
 
-    if reg_dict['ip'] is not None:
-        ip_dict['ip'] = {}
-        for ip in reg_dict['ip'].keys():
-            ip_dict['ip'][ip] = get_ip_info(reg_dict['ip'][ip])
+    for module in reg_dict.keys():
+        if reg_dict[module]['decoder'] is not None:
+            ip_dict[module] = {'decoder': {}}
+            for decoder in reg_dict[module]['decoder'].keys():
+                ip_dict[module]['decoder'][decoder] = get_decoder_info(reg_dict[module]['decoder'][decoder])
+
+    for module in reg_dict.keys():
+        if reg_dict[module]['ip'] is not None:
+            ip_dict[module] = {'decoder': {}}
+            for ip in reg_dict[module]['ip'].keys():
+                ip_dict[module] = get_ip_info(reg_dict, module, ip)
     return ip_dict
 
 
@@ -28,6 +32,7 @@ def get_register_dict(reg_dict):
 # @TODO cehck that field are in decroissant
 # @TODO check that IP offset > sub ip length
 # @TODO check no 0Xa, instead of 0xa
+# @TODO check IP exist
 def validate(reg_dict):
     if reg_dict['decoder'] is not None:
         decoder_keys = ['register', 'addr']
@@ -53,9 +58,16 @@ def validate(reg_dict):
 
 
 # -------------------------------------------------------------------------------------
-def get_ip_info(reg_dict):
-    ip_dict = {'nb': reg_dict['nb'], 'addr': reg_dict['addr'], 'offset': reg_dict['offset']}
-    return ip_dict
+def get_ip_info(reg_dict, module, ip):
+    ip_dict = {module: {'ip': {ip: {'nb': reg_dict[module]['ip'][ip]['nb'], 'addr': reg_dict[module]['ip'][ip]['addr'], 'offset': reg_dict[module]['ip'][ip]['offset']}}, 'decoder': {}}}
+    if reg_dict[module]['ip'][ip]['nb'] > 1:
+        for i in range(reg_dict[module]['ip'][ip]['nb']):
+            for decoder in reg_dict[ip]['decoder'].keys():
+                ip_dict[module]['decoder'][f"{ip}[{i}].{decoder}"] = get_decoder_info(reg_dict[ip]['decoder'][decoder])
+                ip_dict[module]['decoder'][f"{ip}[{i}].{decoder}"]["addr"] += reg_dict[module]['ip'][ip]['addr'] + reg_dict[module]['ip'][ip]['offset'] * i
+                #ip_dict[module]['decoder'][f"{ip}[{i}].{decoder}"][]
+
+    return ip_dict[module]
 
 
 # -------------------------------------------------------------------------------------

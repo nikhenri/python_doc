@@ -23,9 +23,9 @@ MIN_PYTHON = (3, 6)
 if sys.version_info < MIN_PYTHON:
     sys.exit("Python %s.%s or later is required.\n" % MIN_PYTHON)
 
-FILENAME = "tcp_ip.yaml"
+#FILENAME = "tcp_ip.yaml"
 # FILENAME = "config.yaml"
-FILENAME_NO_EXT = os.path.splitext(FILENAME)[0]
+#FILENAME_NO_EXT = os.path.splitext(FILENAME)[0]
 
 # Change Working dir to script dir
 path = os.path.dirname(os.path.realpath(__file__)).replace('\\', '/')
@@ -36,14 +36,15 @@ print(f"")
 print(f"Genik path: " + path)
 print(f"Python path: " + sys.executable.replace('\\', '/') + f" (v{sys.version.split()[0]})")
 
-full_reg_dict = {}
+
+reg_dict = {}
 for filename in glob.glob('*.yaml'):
     print(f"Deserialzer {filename}...")
-    reg_dict = deserialzer.deserialze(filename)
-    print(f"Validate ...")
-    full_reg_dict[pathlib.Path(filename).stem] = register.get_register_dict(reg_dict)
+    reg_dict[pathlib.Path(filename).stem] = deserialzer.deserialze(filename)
     print(f"Done!")
 
+print(f"Validate ...")
+full_reg_dict = register.get_register_dict(reg_dict)
 
 
 
@@ -64,12 +65,13 @@ with open('docParser.ini', 'w') as configfile:
 
 
 print(f"Generate .docx...")
-gen_docx_obj = gen_docx.GenDocx(full_reg_dict['tcp_ip']).generate(FILENAME_NO_EXT, True)
+for module in full_reg_dict.keys():
+    gen_docx_obj = gen_docx.GenDocx(full_reg_dict[module]).generate(module, True)
 print(f"Done!")
 
 
 
-subprocess.check_call(["docParser", "-c", "docParser.ini", f"{FILENAME_NO_EXT}.xml", "docParser.txt"])
+#subprocess.check_call(["docParser", "-c", "docParser.ini", "tcp_ip.xml", "docParser.txt"])
 
 #print(f"Generate .svh...")
 #print(f"Done!")
