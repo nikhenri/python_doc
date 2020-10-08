@@ -1,7 +1,3 @@
-*.docx
 /.idea
 /__pycache__
-/svh
-/*.xml
-/driver/*.h
-/*.txt
+/output

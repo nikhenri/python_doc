@@ -6,8 +6,8 @@
 import os
 import sys
 import subprocess
-import re
-import zipfile
+# import re
+
 
 try:
     import docx
@@ -51,9 +51,7 @@ class GenDocx:
         self.document.save(f'{filename}.docx')
         # # self.set_updatefields_true(f'{filename}.docx')
 
-        with zipfile.ZipFile(f'{filename}.docx') as z:
-            with open(f'{filename}.xml', 'wb') as f:
-                f.write(z.read('word/document.xml'))
+
 
         if open_generate_file:
             os.startfile(f'{filename}.docx')
