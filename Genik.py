@@ -45,10 +45,14 @@ print(f"Validate ...")
 full_reg_dict = register.get_register_dict(reg_dict)
 
 # -------------------------------------------------------------------------------------
-print(f"Clean ouput dir")
-if os.path.isdir('output'):
-    shutil.rmtree('output')
-os.mkdir('output')
+print(f"Clean output dir")
+if not os.path.isdir('output'):
+    os.mkdir('output')
+else:
+    for root, dirs, files in os.walk('output'):
+        for file in files:
+            os.remove(os.path.join(root, file))
+print(f"Done!")
 
 # -------------------------------------------------------------------------------------
 print(f"Generate .docx")

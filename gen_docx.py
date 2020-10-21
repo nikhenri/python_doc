@@ -98,7 +98,7 @@ class GenDocx:
 
     # -------------------------------------------------------------------------------------
     def add_summary_table_content(self, decoder):
-        table = self.document.add_table(rows=1, cols=3)
+        table = self.document.add_table(rows=1, cols=4)
         shading_elm = []
         for i in range(len(table.columns)):  # put the background gray for the 1er row
             shading_elm.append(docx.oxml.parse_xml(r'<w:shd {} w:fill="d9d9d9"/>'.format(docx.oxml.ns.nsdecls('w'))))
@@ -106,22 +106,27 @@ class GenDocx:
 
         table.style = 'Table Grid'  # add border
         hdr_cells = table.rows[0].cells
+
         hdr_cells[0].text = 'Address (Hex)'
-        hdr_cells[0].width = Cm(4.0)
-        hdr_cells[1].text = 'Type'
-        hdr_cells[1].width = Cm(1.0)
-        hdr_cells[2].text = 'Name'
-        hdr_cells[2].width = Cm(19.0)
+        hdr_cells[0].width = Cm(5.0)
+        hdr_cells[1].text = 'Full Address (Hex)'
+        hdr_cells[1].width = Cm(4.0)
+        hdr_cells[2].text = 'Type'
+        hdr_cells[2].width = Cm(1.0)
+        hdr_cells[3].text = 'Name'
+        hdr_cells[3].width = Cm(19.0)
 
         for register in self.register_dict['decoder'][decoder]['register'].keys():
             row_cells = table.add_row().cells
             row_cells[0].text = f"0x{self.register_dict['decoder'][decoder]['register'][register]['addr']:X}"
-            row_cells[0].width = Cm(4.0)
-            row_cells[1].text = self.register_dict['decoder'][decoder]['register'][register]['type']
-            row_cells[1].width = Cm(1.0)
+            row_cells[0].width = Cm(5.0)
+            row_cells[1].text = f"0x{self.register_dict['decoder'][decoder]['addr'] + self.register_dict['decoder'][decoder]['register'][register]['addr']:X}"
+            row_cells[1].width = Cm(4.0)
+            row_cells[2].text = self.register_dict['decoder'][decoder]['register'][register]['type']
+            row_cells[2].width = Cm(1.0)
             full_name = f"{decoder.upper()}_{register}"
-            self.add_link(paragraph=row_cells[2].paragraphs[0], link_to=full_name, text=full_name, tool_tip=full_name)
-            row_cells[2].width = Cm(19.0)
+            self.add_link(paragraph=row_cells[3].paragraphs[0], link_to=full_name, text=full_name, tool_tip=full_name)
+            row_cells[3].width = Cm(19.0)
 
     # -------------------------------------------------------------------------------------
     def add_register_table_title(self, decoder, register):
@@ -132,9 +137,9 @@ class GenDocx:
         paragraph.add_run(f"{decoder.upper()}_{register} (")
         self.add_mark_entry(f"OtiBaseAddress:OTI_{decoder.upper()}_BASE_ADD", paragraph)
         self.add_mark_entry("OtiRegister:Addr", paragraph)
-        paragraph.add_run(f'0x{self.register_dict["decoder"][decoder]["register"][register]["addr"]:04X}')
+        paragraph.add_run(f'0x{self.register_dict["decoder"][decoder]["register"][register]["addr"]:X}')
         self.add_mark_entry("OtiRegister:AddrEnd", paragraph)
-        paragraph.add_run(')')
+        paragraph.add_run(f") (0x{self.register_dict['decoder'][decoder]['addr'] + self.register_dict['decoder'][decoder]['register'][register]['addr']:X})")
         self.add_bookmark(paragraph=paragraph, bookmark_text="", bookmark_name=f"{decoder.upper()}_{register}")
 
     # -------------------------------------------------------------------------------------
@@ -219,7 +224,7 @@ class GenDocx:
     # -------------------------------------------------------------------------------------
     def add_caption_title(self, register, include_chapter_nb=False):
         # Create a paragraph
-        paragraph = self.document.add_paragraph('Table ', style='Caption')
+        paragraph = self.document.add_paragraph('Table ')
         paragraph.paragraph_format.left_indent = -Cm(0.25)
 
         # create a caption with text
