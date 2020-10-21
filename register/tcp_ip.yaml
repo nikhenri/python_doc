@@ -1,14 +1,12 @@
 ip:
 
 decoder:
-    # bus_width: 32
-    # Units, name, instance :
     IPv4:
         addr: 0x3000
-
+        # bus_width: 32
         register:
             0x0:
-                name: "IPV4_IP_ADDR"
+                name: "IP_ADDR"
                 type: "RW"
                 desc: "ip address of offload engine"
                 field:
@@ -18,7 +16,7 @@ decoder:
                         desc: "ip address of offload engine"
 
             0x4:
-                name: "IPV4_SUB_NET_MASK"
+                name: "SUB_NET_MASK"
                 type: "RW"
                 desc: "sub net mask"
                 field:
@@ -28,7 +26,7 @@ decoder:
                         desc: "sub net mask"
 
             0x8:
-                name: "IPV4_DEFAULT_GATEWAY"
+                name: "DEFAULT_GATEWAY"
                 type: "RW"
                 desc: "default gateway"
                 field:
@@ -38,7 +36,7 @@ decoder:
                         desc: "default gateway"
 
             0xC:
-                name: "IPV4_TX_FRAME_CNT"
+                name: "TX_FRAME_CNT"
                 type: "RO"
                 desc: "increment at each frame sent to l2"
                 field:
@@ -48,7 +46,7 @@ decoder:
                         desc: "increment at each frame sent to l2"
 
             0x10:
-                name: "IPV4_RX_FRAME_CNT"
+                name: "RX_FRAME_CNT"
                 type: "RO"
                 desc: "increment at each frame received from l2. increment even frame contain error"
                 field:
@@ -58,7 +56,7 @@ decoder:
                         desc: "increment at each frame received from l2. increment even frame contain error"
 
             0x14:
-                name: "IPV4_RX_ERROR_CHECKSUM_CNT"
+                name: "RX_ERROR_CHECKSUM_CNT"
                 type: "RO"
                 desc: "increment each time a checksum error is detected in the ipv4 header"
                 field:
@@ -68,7 +66,7 @@ decoder:
                         desc: "increment each time a checksum error is detected in the ipv4 header"
 
             0x18:
-                name: "IPV4_RX_ERROR_HEADER_CNT"
+                name: "RX_ERROR_HEADER_CNT"
                 type: "RO"
                 desc: "increment each time the ipv4 header version not equal to 4 or hls not equal to 5 or flags not equal to 2"
                 field:
@@ -78,7 +76,7 @@ decoder:
                         desc: "increment each time the ipv4 header version not equal to 4 or hls not equal to 5 or flags not equal to 2"
 
             0x1C:
-                name: "IPV4_STATUS"
+                name: "STATUS"
                 type: "RO"
                 desc: "ipv4 status"
                 field:
@@ -87,20 +85,12 @@ decoder:
                         rst: 0x0
                         desc: "Indicate the IPv4 default gateway MAC address is resolved"
 
-            0x20:
-                name: "IPV4_TOTO"
-                type: "RO"
-                desc: "ipv4 status"
-                field:
-                    0:
-                        name: "DFLT_GW_TABLE"
-                        rst: 0x0
-                        desc: "Indicate the IPv4 default gateway MAC address is resolved"
+
     UDP:
         addr: 0x7000
         register:
             0x0:
-                name: "UDP_CONTROLS"
+                name: "CONTROLS"
                 type: "RW"
                 desc: "UDP controls"
                 field:
@@ -110,7 +100,7 @@ decoder:
                         desc: "Ask the drop manager to wait for ARP reply instead of dropping the packet if the cuckoo search fail"
 
             0x4:
-                name: "UDP_STATS"
+                name: "STATS"
                 type: "RO"
                 desc: "UDP stats"
                 field:

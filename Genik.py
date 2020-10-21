@@ -19,7 +19,7 @@ import shutil
 import deserialzer
 import register
 import gen_docx
-import gen_tcl
+# import gen_tcl
 # -------------------------------------------------------------------------------------
 # Check version
 MIN_PYTHON = (3, 6)
@@ -49,22 +49,6 @@ print(f"Clean ouput dir")
 if os.path.isdir('output'):
     shutil.rmtree('output')
 os.mkdir('output')
-
-# -------------------------------------------------------------------------------------
-print(f"Generate .tcl")
-if not os.path.isdir('output/vivado'):
-    os.mkdir('output/vivado')
-os.chdir("output/vivado")
-gen_tcl.GenTCL(full_reg_dict).generate(False)
-os.chdir("../../")
-print(f"Done!")
-#exit()
-# -------------------------------------------------------------------------------------
-print(f"Generate .sv")
-
-# -------------------------------------------------------------------------------------
-print(f"Generate .html")
-
 
 # -------------------------------------------------------------------------------------
 print(f"Generate .docx")

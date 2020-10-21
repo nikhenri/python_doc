@@ -1,6 +1,6 @@
 ip:
     tcp_ip:
-        nb: 2
+        nb: 1
         addr:   0x100000
         offset:  0x10000 # multiple, instance, spacing, windows_size, addr_spacing
 

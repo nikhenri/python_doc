@@ -60,12 +60,14 @@ def validate(reg_dict):
 # -------------------------------------------------------------------------------------
 def get_ip_info(reg_dict, module, ip):
     ip_dict = {module: {'ip': {ip: {'nb': reg_dict[module]['ip'][ip]['nb'], 'addr': reg_dict[module]['ip'][ip]['addr'], 'offset': reg_dict[module]['ip'][ip]['offset']}}, 'decoder': {}}}
-    if reg_dict[module]['ip'][ip]['nb'] > 1:
-        for i in range(reg_dict[module]['ip'][ip]['nb']):
-            for decoder in reg_dict[ip]['decoder'].keys():
-                ip_dict[module]['decoder'][f"{ip}[{i}].{decoder}"] = get_decoder_info(reg_dict[ip]['decoder'][decoder])
-                ip_dict[module]['decoder'][f"{ip}[{i}].{decoder}"]["addr"] += reg_dict[module]['ip'][ip]['addr'] + reg_dict[module]['ip'][ip]['offset'] * i
-                #ip_dict[module]['decoder'][f"{ip}[{i}].{decoder}"][]
+    for i in range(reg_dict[module]['ip'][ip]['nb']):
+        for decoder in reg_dict[ip]['decoder'].keys():
+            if reg_dict[module]['ip'][ip]['nb'] > 1:
+                decoder_str = f"{ip}[{i}].{decoder}"
+            else:
+                decoder_str = f"{ip}.{decoder}"
+            ip_dict[module]['decoder'][decoder_str] = get_decoder_info(reg_dict[ip]['decoder'][decoder])
+            ip_dict[module]['decoder'][decoder_str]["addr"] += reg_dict[module]['ip'][ip]['addr'] + reg_dict[module]['ip'][ip]['offset'] * i
 
     return ip_dict[module]
 
