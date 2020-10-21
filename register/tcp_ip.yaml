@@ -1,8 +1,11 @@
 ip:
 
 decoder:
+    # bus_width: 32
+    # Units, name, instance :
     IPv4:
         addr: 0x3000
+
         register:
             0x0:
                 name: "IPV4_IP_ADDR"
@@ -84,6 +87,15 @@ decoder:
                         rst: 0x0
                         desc: "Indicate the IPv4 default gateway MAC address is resolved"
 
+            0x20:
+                name: "IPV4_TOTO"
+                type: "RO"
+                desc: "ipv4 status"
+                field:
+                    0:
+                        name: "DFLT_GW_TABLE"
+                        rst: 0x0
+                        desc: "Indicate the IPv4 default gateway MAC address is resolved"
     UDP:
         addr: 0x7000
         register:
@@ -102,7 +114,7 @@ decoder:
                 type: "RO"
                 desc: "UDP stats"
                 field:
-                    2:
+                    51:
                         name: "DROP_MANAGER_WAITING_SEARCH"
                         rst: 0x0
                         desc: "Drop manager is waiting for SEARCH reply to his request"

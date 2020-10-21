@@ -19,7 +19,7 @@ import shutil
 import deserialzer
 import register
 import gen_docx
-
+import gen_tcl
 # -------------------------------------------------------------------------------------
 # Check version
 MIN_PYTHON = (3, 6)
@@ -45,9 +45,26 @@ print(f"Validate ...")
 full_reg_dict = register.get_register_dict(reg_dict)
 
 # -------------------------------------------------------------------------------------
+print(f"Clean ouput dir")
 if os.path.isdir('output'):
     shutil.rmtree('output')
 os.mkdir('output')
+
+# -------------------------------------------------------------------------------------
+print(f"Generate .tcl")
+if not os.path.isdir('output/vivado'):
+    os.mkdir('output/vivado')
+os.chdir("output/vivado")
+gen_tcl.GenTCL(full_reg_dict).generate(False)
+os.chdir("../../")
+print(f"Done!")
+#exit()
+# -------------------------------------------------------------------------------------
+print(f"Generate .sv")
+
+# -------------------------------------------------------------------------------------
+print(f"Generate .html")
+
 
 # -------------------------------------------------------------------------------------
 print(f"Generate .docx")
@@ -55,7 +72,7 @@ if not os.path.isdir('output/doc'):
     os.mkdir('output/doc')
 os.chdir("output/doc")
 for module in full_reg_dict.keys():
-    gen_docx_obj = gen_docx.GenDocx(full_reg_dict[module]).generate(module, False)
+    gen_docx.GenDocx(full_reg_dict[module]).generate(module, False)
 # gen_docx.GenDocx(full_reg_dict["tcp_ip"]).generate("tcp_ip", True)
 os.chdir("../../")
 print(f"Done!")
